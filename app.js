@@ -610,17 +610,11 @@
       '<div class="loc__grid">' +
 
         '<div>' +
-          '<a class="loc__map" href="' + esc(y.org || '#') + '" target="_blank" rel="noopener">' +
+          '<a class="loc__map" href="' + esc(y.org || '#') + '" target="_blank" rel="noopener" ' +
+            'aria-label="Открыть в Яндекс.Картах">' +
             '<img class="loc__map-img" src="' + esc(l.mapImage) + '" ' +
               'alt="Карта: ' + esc(l.address) + '" loading="lazy" width="1200" height="825">' +
-            '<span class="loc__map-hint">' + ic('pin', { size: 15 }) +
-              'Открыть в Яндекс.Картах' + ic('arrow', { size: 14 }) + '</span>' +
           '</a>' +
-          '<div class="loc__map-actions">' +
-            (y.route ? '<a class="btn btn--cta btn--sm" href="' + esc(y.route) + '" target="_blank" rel="noopener">' +
-              'Построить маршрут' + ic('arrow', { size: 15 }) + '</a>' : '') +
-            '<span class="loc__map-credit">Карта © OpenStreetMap</span>' +
-          '</div>' +
         '</div>' +
 
         '<div class="loc__info">' +
@@ -634,7 +628,7 @@
             '<b>' + esc(l.routesLabel) + '</b>' +
             '<div class="loc__routes">' + routes + '</div>' +
           '</div>' +
-          (y.org ? '<a class="btn btn--cta" href="' + esc(y.org) + '" target="_blank" rel="noopener">' +
+          (y.org ? '<a class="btn btn--map" href="' + esc(y.org) + '" target="_blank" rel="noopener">' +
             'Открыть в Яндекс.Картах' + ic('arrow', { size: 16 }) + '</a>' : '') +
         '</div>' +
 
@@ -709,7 +703,7 @@
 
       '<div class="footer__bottom">' +
         '<span>© ' + new Date().getFullYear() + ' ' + esc(legal.orgName || S.brand.name) +
-          (reqs.length ? ' · ' + reqs.join(' · ') : '') + '</span>' +
+          (reqs.length ? ' · ' + reqs.join(' · ') : '') + ' · Карта © OpenStreetMap</span>' +
         '<a href="#">' + esc(f.privacyLabel) + '</a>' +
       '</div>' +
     '</div></footer>';

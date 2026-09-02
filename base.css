@@ -100,6 +100,39 @@ h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; }
    просто никуда не ведёт. Номер появится в config.js. */
 a[data-no-phone] { cursor: default; }
 
+
+/* ---------- белая кнопка (в стилистике Яндекс.Карт) ---------- */
+.btn--map {
+  background: #fff;
+  color: #12090a;
+  border: 1px solid #fff;
+  font-weight: 600;
+}
+.btn--map svg { color: #12090a; }
+.btn--map:hover,
+.btn--map:focus-visible {
+  background: #e9e6e4;
+  border-color: #e9e6e4;
+  color: #12090a;
+}
+
+/* ---------- телефон: кнопки записи всегда «горят» ----------
+   На ПК подсветка появляется при наведении; на телефоне наводить нечем,
+   поэтому там она включена постоянно. Только для сенсорных экранов. */
+@media (hover: none), (pointer: coarse) {
+  .btn--cta {
+    background: var(--accent-hot);
+    border-color: #ff7a72;
+    color: #fff;
+    text-shadow: 0 0 16px rgba(255, 255, 255, .85), 0 0 34px rgba(255, 255, 255, .4);
+    box-shadow: 0 0 26px -4px rgba(255, 42, 32, .75);
+  }
+  .btn--cta svg { filter: drop-shadow(0 0 6px rgba(255, 255, 255, .8)); }
+  /* белая кнопка карты подсветку не получает */
+  .btn--map, .btn--map:hover { background: #fff; color: #12090a; border-color: #fff; box-shadow: none; text-shadow: none; }
+  .btn--map svg { filter: none; }
+}
+
 /* ---------- шапка ----------
    Висит поверх первого экрана. Своего фона нет — только мягкая
    растушёвка, чтобы не читалась отдельной панелью. Без backdrop-filter. */
