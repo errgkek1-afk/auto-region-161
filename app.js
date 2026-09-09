@@ -968,6 +968,30 @@
      обработчики бы отваливались. На компьютере подсказка и так открыта
      по наведению — здесь только тап и закрытие. */
   function wireTerms() {
+    /* Подсказка выравнена по левому краю слова. Если слово стоит у правого
+       края экрана, плашка вылезала бы за него — сдвигаем ровно настолько,
+       чтобы она целиком помещалась. Меряем до показа: она hidden, но
+       размеры у неё уже есть. */
+    function placeTip(t) {
+      var tip = t.querySelector('.term__tip');
+      if (!tip) return;
+      tip.style.left = '';
+      var r = tip.getBoundingClientRect();
+      var vw = document.documentElement.clientWidth;
+      var over = r.right - (vw - 12);
+      if (over > 0) tip.style.left = -Math.ceil(over) + 'px';
+      else if (r.left < 12) tip.style.left = Math.ceil(12 - r.left) + 'px';
+    }
+    ['mouseover', 'focusin'].forEach(function (ev) {
+      document.addEventListener(ev, function (e) {
+        var t = e.target.closest ? e.target.closest('.term') : null;
+        if (t) placeTip(t);
+      }, { passive: true });
+    });
+    window.addEventListener('resize', function () {
+      document.querySelectorAll('.term__tip').forEach(function (tip) { tip.style.left = ''; });
+    });
+
     function closeOpen(except) {
       var open = document.querySelector('.term.is-open');
       if (open && open !== except) {
@@ -980,6 +1004,7 @@
       closeOpen(t);
       if (!t) return;
       e.preventDefault();
+      placeTip(t);
       var open = t.classList.toggle('is-open');
       t.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
