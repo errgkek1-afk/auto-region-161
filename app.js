@@ -36,9 +36,19 @@
   }
 
   function lede(text) {
-    return esc(text)
+    return term(esc(text)
       .replace(/\{([^}]+)\}/g, '<b>$1</b>')
-      .replace(/\n/g, '<br>');          /* перенос строки внутри абзаца */
+      .replace(/\n/g, '<br>'));         /* перенос строки внутри абзаца */
+  }
+
+  /* [[ТНВД|расшифровка]] -> термин с всплывающей подсказкой.
+     На компьютере открывается наведением, на телефоне — тапом (wireTerms).
+     Без модальных окон и библиотек — ТЗ §3.3. */
+  function term(html) {
+    return html.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, function (_, word, tip) {
+      return '<button class="term" type="button" aria-expanded="false">' +
+        word + '<span class="term__tip" role="tooltip">' + tip + '</span></button>';
+    });
   }
 
   /* Реальное фото машины или размеченная заглушка (ТЗ §3.1) */
@@ -257,12 +267,31 @@
   function panelHtml(i) {
     var b = S.tuning.subblocks[i];
 
-    var groups = b.blocks.map(function (g) {
+    var groups = (b.blocks || []).map(function (g) {
       return '<div class="panel__group">' +
         (g.h ? '<span class="panel__h">' + esc(g.h) + '</span>' : '') +
         '<p class="panel__text">' + lede(g.text) + '</p>' +
       '</div>';
     }).join('');
+
+    /* Две панели вместо сплошных абзацев: слева тип впрыска, справа второй,
+       под каждой — счётчик машин. Читается взглядом, а не абзацами. */
+    var cards = '';
+    if (b.cards && b.cards.length) {
+      cards = '<div class="panel__cards-wrap">' +
+        (b.cardsLead ? '<span class="panel__cards-lead">' + esc(b.cardsLead) + '</span>' : '') +
+        '<div class="panel__cards">' + b.cards.map(function (c) {
+          return '<div class="panel__card">' +
+            '<span class="panel__card-h">' + esc(c.h) + '</span>' +
+            (c.sub ? '<span class="panel__card-sub">' + esc(c.sub) + '</span>' : '') +
+            '<p class="panel__card-text">' + lede(c.text) + '</p>' +
+            (c.note ? '<p class="panel__card-note">' + esc(c.note) + '</p>' : '') +
+            (c.count ? '<span class="panel__count">' + esc(c.count) + '</span>' : '') +
+          '</div>';
+        }).join('') + '</div>' +
+        (b.cardsOut ? '<p class="panel__cards-out">' + esc(b.cardsOut) + '</p>' : '') +
+      '</div>';
+    }
 
     var revUrl = (C.yandex && C.yandex.reviews) || '';
     var revTag = (b.review && b.review.link && revUrl) ? 'a' : 'div';
@@ -297,12 +326,19 @@
         '<div class="panel__ctas">' + ctas + '</div>' +
       '</div>';
 
-    return '<div class="panel" data-panel="' + esc(b.key) + '">' +
-      '<div class="panel__body">' +
-        (b.heading ? '<h3 class="panel__heading">' + esc(b.heading) + '</h3>' : '') +
-        groups +
-        review +
-      '</div>' +
+    /* Подблок с панелями идёт в одну колонку во всю ширину: две панели
+       рядом внутри половины экрана были бы слишком узкими для чтения. */
+    var body = (groups || review || b.heading)
+      ? '<div class="panel__body">' +
+          (b.heading ? '<h3 class="panel__heading">' + esc(b.heading) + '</h3>' : '') +
+          groups +
+          review +
+        '</div>'
+      : '';
+
+    return '<div class="panel' + (cards ? ' panel--cards' : '') + '" data-panel="' + esc(b.key) + '">' +
+      body +
+      cards +
       '<div class="panel__media">' +
         '<figure class="panel__figure">' + photo(b, false) + '</figure>' +
       '</div>' +
@@ -739,6 +775,7 @@
     wireCalc();
     wireAccordions();
     wireCarousels();
+    wireTerms();
   }
 
   /* ---------- шапка ---------- */
@@ -926,6 +963,31 @@
   }
 
   /* ---------- блок 9: карта грузится по клику ---------- */
+  /* Термины с подсказкой. Слушаем на документе, а не на самих словах:
+     панель блока 3 перерисовывается при смене вкладки, и обычные
+     обработчики бы отваливались. На компьютере подсказка и так открыта
+     по наведению — здесь только тап и закрытие. */
+  function wireTerms() {
+    function closeOpen(except) {
+      var open = document.querySelector('.term.is-open');
+      if (open && open !== except) {
+        open.classList.remove('is-open');
+        open.setAttribute('aria-expanded', 'false');
+      }
+    }
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('.term') : null;
+      closeOpen(t);
+      if (!t) return;
+      e.preventDefault();
+      var open = t.classList.toggle('is-open');
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeOpen(null);
+    });
+  }
+
   /* Ленты фото (блок 9 и блок 8): стрелки листают на одну плитку,
      прячутся у краёв и когда листать нечего. Свайп работает и без JS. */
   function wireCarousels() {

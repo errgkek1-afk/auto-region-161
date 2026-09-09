@@ -287,6 +287,9 @@
   .panel { grid-template-columns: 1fr 1fr; align-items: center; }
   /* строка-вывод и сноска идут во всю ширину — чтобы влезали в одну строку */
   .panel__foot { grid-column: 1 / -1; }
+  /* подблок с панелями — в одну колонку: две панели внутри половины
+     экрана были бы слишком узкими для чтения */
+  .panel--cards { grid-template-columns: 1fr; }
 }
 
 .panel__heading {
@@ -305,6 +308,102 @@
 /* приглушённый текст, ключевая мысль — белым */
 .panel__text { font-size: var(--fs-lead); line-height: 1.55; color: var(--text-muted); }
 .panel__text b { font-weight: 600; color: var(--text); }
+
+/* ---------- две панели «тип впрыска» вместо сплошных абзацев ---------- */
+.panel__cards-wrap { display: grid; gap: 16px; }
+.panel__cards-lead {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.panel__cards { display: grid; gap: 14px; align-items: start; }
+@media (min-width: 760px) { .panel__cards { grid-template-columns: 1fr 1fr; } }
+
+.panel__card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: clamp(18px, 2.4vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+.panel__card-h {
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.panel__card-sub {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--accent-hot);
+}
+.panel__card-text { font-size: var(--fs-sm); line-height: 1.6; color: var(--text-muted); }
+.panel__card-text b { font-weight: 600; color: var(--text); }
+.panel__card-note { font-size: var(--fs-xs); line-height: 1.5; color: var(--text); }
+.panel__count {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.panel__cards-out {
+  font-size: var(--fs-sm);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ---------- термин со всплывающей подсказкой ----------
+   На компьютере открывается наведением, на телефоне — тапом (класс is-open).
+   Никаких модалок и библиотек: одна плашка на CSS. */
+.term {
+  position: relative;
+  display: inline;
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  font-weight: 600;
+  border-bottom: 1px dashed var(--accent-hot);
+  cursor: help;
+}
+.term__tip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  z-index: 20;
+  width: max-content;
+  max-width: min(280px, 78vw);
+  padding: 11px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #150d0e;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .55);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  color: var(--text-muted);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity .16s ease, transform .16s ease, visibility .16s;
+}
+.term.is-open .term__tip,
+.term:focus-visible .term__tip { opacity: 1; visibility: visible; transform: translateY(0); }
+@media (hover: hover) and (pointer: fine) {
+  .term:hover .term__tip { opacity: 1; visibility: visible; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .term__tip { transition: none; } }
+
 
 .panel__note {
   margin-top: 0;
@@ -370,6 +469,9 @@
   overflow: hidden;
 }
 .panel__figure img { width: 100%; height: 100%; object-fit: cover; }
+/* в подблоке с панелями фото идёт широкой полосой под ними:
+   пропорция 16/10 вместе с max-height ужимала его до половины ширины */
+.panel--cards .panel__figure { aspect-ratio: auto; height: clamp(200px, 24vw, 300px); max-height: none; }
 .panel__figure .photo-stub { width: 100%; height: 100%; }
 
 /* смена подблока — мягкое проявление */
