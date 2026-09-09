@@ -287,9 +287,11 @@
   .panel { grid-template-columns: 1fr 1fr; align-items: center; }
   /* строка-вывод и сноска идут во всю ширину — чтобы влезали в одну строку */
   .panel__foot { grid-column: 1 / -1; }
-  /* подблок с панелями — в одну колонку: две панели внутри половины
-     экрана были бы слишком узкими для чтения */
-  .panel--cards { grid-template-columns: 1fr; }
+  /* подблок с панелями: слева фото, справа плашки одна под другой.
+     В разметке плашки идут первыми — на телефоне текст читается раньше фото,
+     а на широком экране их раскладывает по местам сетка. */
+  .panel--cards .panel__media     { grid-column: 1; grid-row: 1; }
+  .panel--cards .panel__cards-wrap { grid-column: 2; grid-row: 1; }
 }
 
 .panel__heading {
@@ -319,7 +321,7 @@
   color: var(--text-dim);
 }
 .panel__cards { display: grid; gap: 14px; align-items: start; }
-@media (min-width: 760px) { .panel__cards { grid-template-columns: 1fr 1fr; } }
+/* одна под другой — так задал заказчик */
 
 .panel__card {
   display: grid;
@@ -469,9 +471,7 @@
   overflow: hidden;
 }
 .panel__figure img { width: 100%; height: 100%; object-fit: cover; }
-/* в подблоке с панелями фото идёт широкой полосой под ними:
-   пропорция 16/10 вместе с max-height ужимала его до половины ширины */
-.panel--cards .panel__figure { aspect-ratio: auto; height: clamp(200px, 24vw, 300px); max-height: none; }
+
 .panel__figure .photo-stub { width: 100%; height: 100%; }
 
 /* смена подблока — мягкое проявление */

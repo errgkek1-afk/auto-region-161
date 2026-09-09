@@ -83,9 +83,9 @@ h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; }
 
 /* Кнопка в шапке: в покое приглушённая, при наведении загорается. */
 .btn--soft {
-  background: rgba(255, 255, 255, .05);
-  border: 1px solid var(--line-strong);
-  color: var(--text-muted);
+  background: var(--accent-deep);
+  border: 1px solid #7a1d19;
+  color: #fff;
 }
 .btn--soft:hover,
 .btn--soft:focus-visible {
@@ -128,6 +128,13 @@ a[data-no-phone] { cursor: default; }
     box-shadow: 0 0 26px -4px rgba(255, 42, 32, .75);
   }
   .btn--cta svg { filter: drop-shadow(0 0 6px rgba(255, 255, 255, .8)); }
+  .btn--soft {
+    background: var(--accent-hot);
+    border-color: #ff7a72;
+    color: #fff;
+    text-shadow: 0 0 14px rgba(255, 255, 255, .8);
+    box-shadow: 0 0 22px -4px rgba(255, 42, 32, .8);
+  }
   /* белая кнопка карты подсветку не получает */
   .btn--map, .btn--map:hover { background: #fff; color: #12090a; border-color: #fff; box-shadow: none; text-shadow: none; }
   .btn--map svg { filter: none; }
