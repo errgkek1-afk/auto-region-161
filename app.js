@@ -351,7 +351,9 @@
         '</div>'
       : '';
 
-    return '<div class="panel' + (cards ? ' panel--cards' : '') + '" data-panel="' + esc(b.key) + '">' +
+    var hasShots = !!(b.shots && b.shots.length);
+    return '<div class="panel' + (cards ? ' panel--cards' : '') +
+      (hasShots ? ' panel--shots' : '') + '" data-panel="' + esc(b.key) + '">' +
       body +
       cards +
       '<div class="panel__media">' +

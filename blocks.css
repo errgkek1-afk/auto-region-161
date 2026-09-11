@@ -296,11 +296,18 @@
   .panel { grid-template-columns: 1fr 1fr; align-items: center; }
   /* строка-вывод и сноска идут во всю ширину — чтобы влезали в одну строку */
   .panel__foot { grid-column: 1 / -1; }
-  /* подблок с панелями: слева фото, справа плашки одна под другой.
-     В разметке плашки идут первыми — на телефоне текст читается раньше фото,
-     а на широком экране их раскладывает по местам сетка. */
-  .panel--cards .panel__media     { grid-column: 1; grid-row: 1; }
-  .panel--cards .panel__cards-wrap { grid-column: 2; grid-row: 1; }
+  /* подблок с панелями: слева плашки с текстом, справа фото */
+  .panel--cards .panel__cards-wrap { grid-column: 1; grid-row: 1; }
+  .panel--cards .panel__media      { grid-column: 2; grid-row: 1; }
+
+  /* Подблоки с фото (не с панелями): вывод и кнопка остаются в левой
+     колонке, на уровне с фотографией. Раньше они уходили во всю ширину
+     под высокое фото — слева зиял пустой кусок, страница растягивалась. */
+  .panel--shots .panel__foot { grid-column: 1; }
+  /* фото стоит по центру своей колонки, не прижимаясь ни к тексту, ни к краю.
+     Центрируем саму ленту, а не колонку: justify-self схлопывал колонку
+     до ширины содержимого, и кадры сжимались почти в ноль. */
+  .panel--shots .panel__media { justify-self: stretch; }
 }
 
 .panel__heading {
@@ -474,9 +481,10 @@
    Плашка скруглена так же, как заглушка и кадр на первом экране.
    Кадры вертикальные, пропорция 2/3 — ближе всего к исходникам,
    поэтому object-fit подрезает минимально. */
-.shots { display: grid; gap: 14px; }
+.shots { display: grid; gap: 14px; width: 100%; }
 .shots--2 { grid-template-columns: 1fr 1fr; }
-.shots--1 { max-width: 360px; }
+/* одиночный кадр не растягиваем на всю колонку и ставим по её центру */
+.shots--1 { max-width: 360px; margin-inline: auto; }
 
 .shot { margin: 0; display: grid; gap: 8px; }
 .shot__frame {
@@ -612,6 +620,43 @@
 }
 .compare__figure img { width: 100%; height: 100%; object-fit: cover; }
 .compare__figure .photo-stub { width: 100%; height: 100%; }
+
+/* ---------- телефон: фото наслаиваются при прокрутке ----------
+   Эффект из «золотого репо» (липкие карточки с уменьшением), переписанный
+   на чистый CSS: стопку даёт position: sticky — без единой строчки JS,
+   уменьшение — скролл-анимация. Где браузер её не понимает, карточки
+   просто останутся стопкой, блок не сломается. */
+@media (max-width: 700px) {
+  .compare__photos {
+    display: block;
+    padding-bottom: 26vh;          /* запас, чтобы последний кадр успел приклеиться */
+  }
+  .compare__figure {
+    position: sticky;
+    aspect-ratio: 4 / 5;           /* все кадры одного размера */
+    margin-bottom: 20px;
+    transform-origin: top center;
+    box-shadow: 0 -18px 34px rgba(0, 0, 0, .6);
+    border: 1px solid var(--line);
+  }
+  .compare__figure:nth-child(1) { top: calc(var(--header-h) + 14px); }
+  .compare__figure:nth-child(2) { top: calc(var(--header-h) + 28px); }
+  .compare__figure:nth-child(3) { top: calc(var(--header-h) + 42px); }
+  .compare__figure:nth-child(4) { top: calc(var(--header-h) + 56px); }
+
+  @supports (animation-timeline: view()) {
+    .compare__figure {
+      animation: shot-shrink linear both;
+      animation-timeline: view();
+      animation-range: exit-crossing 0% exit-crossing 100%;
+    }
+    @keyframes shot-shrink { to { transform: scale(.9); } }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare__figure { animation: none; position: static; }
+}
 
 /* =====================================================================
    БЛОК 5 — Калькулятор, гарантия, состав комплекта
