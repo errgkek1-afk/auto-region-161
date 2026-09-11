@@ -27,6 +27,9 @@ body {
 }
 
 img, svg, video { display: block; max-width: 100%; }
+/* <picture> не должен создавать свою коробку: тогда вся вёрстка,
+   написанная под <img>, продолжает работать без правок */
+picture { display: contents; }
 img { height: auto; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { background: none; border: 0; cursor: pointer; }

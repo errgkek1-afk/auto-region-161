@@ -51,12 +51,32 @@
     });
   }
 
+  /* Картинка в двух форматах: WebP (легче примерно на треть) и запасной
+     JPEG для старых браузеров. Для первого экрана есть ещё крупный кадр
+     @2x — его берут только большие плотные экраны, телефон качает лёгкий.
+     В CSS у <picture> стоит display: contents, поэтому вся вёрстка,
+     написанная под <img>, продолжает работать как раньше. */
+  function pic(src, alt, w, h, opt) {
+    opt = opt || {};
+    var base = esc(String(src).replace(/\.jpg$/, ''));
+    var srcset = opt.x2
+      ? base + '.webp 800w, ' + base + '@2x.webp 1600w'
+      : base + '.webp';
+    return '<picture>' +
+      '<source type="image/webp" srcset="' + srcset + '"' +
+        (opt.x2 ? ' sizes="(max-width: 1023px) 96vw, 50vw"' : '') + '>' +
+      '<img src="' + esc(src) + '" alt="' + esc(alt || '') + '"' +
+        (w && h ? ' width="' + w + '" height="' + h + '"' : '') +
+        (opt.eager ? ' fetchpriority="high"' : ' loading="lazy"') +
+        ' decoding="async">' +
+    '</picture>';
+  }
+
   /* Реальное фото машины или размеченная заглушка (ТЗ §3.1) */
   function photo(state, eager) {
     if (state.photo) {
-      return '<img src="' + esc(state.photo) + '" alt="' + esc(state.photoNeed) + '"' +
-             (state.w && state.h ? ' width="' + state.w + '" height="' + state.h + '"' : '') +
-             (eager ? '' : ' loading="lazy"') + '>';
+      return pic(state.photo, state.photoNeed, state.w, state.h,
+                 { eager: eager, x2: state.x2 });
     }
     return '<div class="photo-stub">' +
              '<span class="photo-stub__tag">' + esc(state.photoKind || 'Фото') + '</span>' +
@@ -71,8 +91,7 @@
     return '<div class="shots shots--' + items.length + '">' + items.map(function (x) {
       return '<figure class="shot">' +
         '<span class="shot__frame">' +
-          '<img src="' + esc(x.src) + '" alt="' + esc(x.alt || '') + '"' +
-          (x.w && x.h ? ' width="' + x.w + '" height="' + x.h + '"' : '') + ' loading="lazy">' +
+          pic(x.src, x.alt, x.w, x.h) +
         '</span>' +
         (x.cap ? '<figcaption class="shot__cap">' + esc(x.cap) + '</figcaption>' : '') +
       '</figure>';
@@ -87,7 +106,7 @@
     var slides = photos.map(function (ph) {
       return '<figure class="strip__item">' +
         (ph.src
-          ? '<img src="' + esc(ph.src) + '" alt="' + esc(ph.need || '') + '" loading="lazy">'
+          ? pic(ph.src, ph.need, ph.w, ph.h)
           : '<div class="photo-stub"><span class="photo-stub__tag">Фото</span>' +
               '<p class="photo-stub__text">' + esc(ph.need || '') + '</p></div>') +
       '</figure>';
@@ -667,8 +686,11 @@
         '<div>' +
           '<a class="loc__map" href="' + esc(y.org || '#') + '" target="_blank" rel="noopener" ' +
             'aria-label="Открыть в Яндекс.Картах">' +
-            '<img class="loc__map-img" src="' + esc(l.mapImage) + '" ' +
-              'alt="Карта: ' + esc(l.address) + '" loading="lazy" width="1200" height="825">' +
+            '<picture><source type="image/webp" srcset="' +
+              esc(String(l.mapImage).replace(/\.jpg$/, '')) + '.webp">' +
+              '<img class="loc__map-img" src="' + esc(l.mapImage) + '" ' +
+              'alt="Карта: ' + esc(l.address) + '" loading="lazy" decoding="async" ' +
+              'width="1200" height="825"></picture>' +
           '</a>' +
         '</div>' +
 
@@ -693,7 +715,7 @@
       '<div class="loc__gallery">' + l.photos.map(function (ph) {
         return '<figure class="loc__shot">' +
           (ph.src
-            ? '<img src="' + esc(ph.src) + '" alt="' + esc(ph.need || '') + '" loading="lazy">'
+            ? pic(ph.src, ph.need, ph.w, ph.h)
             : '<div class="photo-stub"><span class="photo-stub__tag">Фото</span>' +
               '<p class="photo-stub__text">' + esc(ph.need || '') + '</p></div>') +
         '</figure>';
