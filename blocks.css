@@ -289,6 +289,9 @@
 
 /* ---------- содержимое подблока: слева текст, справа фото ---------- */
 .panel { display: grid; row-gap: 26px; column-gap: clamp(32px, 5vw, 88px); align-items: start; }
+/* без этого содержимое колонок вылезает за край подблока: у элемента сетки
+   минимальная ширина по умолчанию равна ширине содержимого, а не нулю */
+.panel > * { min-width: 0; }
 @media (min-width: 1024px) {
   .panel { grid-template-columns: 1fr 1fr; align-items: center; }
   /* строка-вывод и сноска идут во всю ширину — чтобы влезали в одну строку */
@@ -466,6 +469,40 @@
   text-align: center;
 }
 .panel__ctas .btn { max-width: 100%; }
+
+/* ---------- фото в скруглённых плашках (блок 3) ----------
+   Плашка скруглена так же, как заглушка и кадр на первом экране.
+   Кадры вертикальные, пропорция 2/3 — ближе всего к исходникам,
+   поэтому object-fit подрезает минимально. */
+.shots { display: grid; gap: 14px; }
+.shots--2 { grid-template-columns: 1fr 1fr; }
+.shots--1 { max-width: 360px; }
+
+.shot { margin: 0; display: grid; gap: 8px; }
+.shot__frame {
+  display: block;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+}
+.shot__frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot__cap {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* телефон: плашки одна под другой, чтобы кадры было видно крупно */
+@media (max-width: 700px) {
+  .shots--2 { grid-template-columns: 1fr; }
+  .shots--1 { max-width: none; }
+  .shot__frame { aspect-ratio: 4 / 5; }
+}
 
 /* правая колонка */
 .panel__media { display: grid; gap: 16px; }

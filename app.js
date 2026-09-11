@@ -64,6 +64,21 @@
            '</div>';
   }
 
+  /* Фото в скруглённых плашках справа от текста (блок 3).
+     Одно фото — одна плашка, два — рядом. cap рисует подпись под кадром. */
+  function shotsHtml(items) {
+    if (!items || !items.length) return '';
+    return '<div class="shots shots--' + items.length + '">' + items.map(function (x) {
+      return '<figure class="shot">' +
+        '<span class="shot__frame">' +
+          '<img src="' + esc(x.src) + '" alt="' + esc(x.alt || '') + '"' +
+          (x.w && x.h ? ' width="' + x.w + '" height="' + x.h + '"' : '') + ' loading="lazy">' +
+        '</span>' +
+        (x.cap ? '<figcaption class="shot__cap">' + esc(x.cap) + '</figcaption>' : '') +
+      '</figure>';
+    }).join('') + '</div>';
+  }
+
   /* Лента фото: листается влево-вправо (свайп на телефоне, стрелки на
      десктопе). Кадры одного размера — object-fit: cover в CSS их подрежет.
      variant задаёт пропорции плитки (см. .strip--* в blocks.css). */
@@ -340,7 +355,9 @@
       body +
       cards +
       '<div class="panel__media">' +
-        '<figure class="panel__figure">' + photo(b, false) + '</figure>' +
+        (b.shots && b.shots.length
+          ? shotsHtml(b.shots)
+          : '<figure class="panel__figure">' + photo(b, false) + '</figure>') +
       '</div>' +
       foot +
     '</div>';
