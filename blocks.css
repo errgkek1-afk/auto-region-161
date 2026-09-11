@@ -67,14 +67,21 @@
   color: var(--text-muted);
 }
 
-/* Телефон: заголовок и строка впрыска по центру, впрыск — одной строкой */
+/* Телефон: всё по центру, кроме списка хуков — он остаётся слева,
+   иначе строки с иконками разъезжаются и читать неудобно. */
 @media (max-width: 1023px) {
   .hero__title,
-  .hero__engines { text-align: center; }
+  .hero__engines,
+  .hero__term,
+  .hero__caption-title,
+  .hero__caption-sub { text-align: center; }
   .hero__engines {
     white-space: nowrap;
     font-size: clamp(0.66rem, 3.05vw, 1.05rem);
   }
+  /* кнопка и счётчик — по центру и на одном уровне */
+  .hero__actions { justify-content: center; }
+  .hero__counter { justify-content: center; }
 }
 
 /* плашка срока — переключается «роликом» */
