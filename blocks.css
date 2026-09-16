@@ -1272,7 +1272,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 .footer__disc { margin-top: 12px; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-dim); max-width: 44ch; }
 
 .footer__col b { display: block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
-.footer__col a, .footer__col span { display: block; font-size: var(--fs-sm); color: var(--text-muted); padding-block: 5px; }
+.footer__col a, .footer__col span { display: block; font-size: var(--fs-sm); color: var(--text-muted); padding-block: 10px; }
 .footer__col a { transition: color .15s; }
 .footer__col a:hover { color: var(--text); }
 
@@ -1284,7 +1284,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
   font-size: var(--fs-xs);
   color: var(--text-dim);
 }
-.footer__bottom a { color: var(--text-dim); transition: color .15s; }
+.footer__bottom a { display: inline-block; padding-block: 12px; color: var(--text-dim); transition: color .15s; }
 .footer__bottom a:hover { color: var(--text-muted); }
 
 

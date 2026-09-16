@@ -35,9 +35,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
 
-  <link rel="stylesheet" href="theme.css?v=1789600500">
-  <link rel="stylesheet" href="base.css?v=1789600500">
-  <link rel="stylesheet" href="blocks.css?v=1789600500">
+  <link rel="stylesheet" href="theme.css?v=1789600700">
+  <link rel="stylesheet" href="base.css?v=1789600700">
+  <link rel="stylesheet" href="blocks.css?v=1789600700">
 
   <!-- карточка организации для Яндекса и Google -->
   <script type="application/ld+json">
@@ -77,6 +77,47 @@
     ]
   }
   </script>
+  <!-- частые вопросы для Яндекса и Google; тексты — из content.js → faq -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Не сушит ли мотор? Не взорвётся?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Газ не отличается по классу безопасности от бензина. Заводы сами выпускают машины на газу — Volkswagen, Mercedes, Opel, KIA, Hyundai. Если бы это было опасно, они бы этого не делали."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Потеряю мощность?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "На пропане просадки нет — машина едет один в один как на бензине. Октановое число пропана 105, выше обычного бензина: топливо сгорает лучше. Для турбомоторов это отдельный плюс — уходит детонация."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Займёт весь багажник?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "В 90% случаев ставится тороидальный баллон вместо запасного колеса — багажник остаётся свободным."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Сколько времени займёт?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "От 7 часов на обычной машине, от 48 часов на прямом впрыске. Мы не просто ставим оборудование — мы выезжаем и донастраиваем его в движении, и это входит в стоимость. Именно поэтому у нас не бывает установки за три часа."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <div id="app"></div>
@@ -90,9 +131,9 @@
     </div>
   </noscript>
 
-  <script src="config.js?v=1789600500"></script>
-  <script src="content.js?v=1789600500"></script>
-  <script src="icons.js?v=1789600500"></script>
-  <script src="app.js?v=1789600500"></script>
+  <script src="config.js?v=1789600700"></script>
+  <script src="content.js?v=1789600700"></script>
+  <script src="icons.js?v=1789600700"></script>
+  <script src="app.js?v=1789600700"></script>
 </body>
 </html>

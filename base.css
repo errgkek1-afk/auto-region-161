@@ -256,7 +256,8 @@ a[data-no-phone] { cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   .mobile-menu { transition: opacity .12s ease; transform: none; }
 }
-.mobile-menu a {
+/* обычные пункты меню; кнопка записи сюда не попадает — у неё свой стиль */
+.mobile-menu a:not(.btn) {
   display: block;
   padding: 11px 12px;
   border-radius: var(--radius-sm);
@@ -264,8 +265,18 @@ a[data-no-phone] { cursor: default; }
   font-weight: 500;
   color: var(--text-muted);
 }
-.mobile-menu a:hover { background: var(--bg-elevated); color: var(--text); }
+.mobile-menu a:not(.btn):hover { background: var(--bg-elevated); color: var(--text); }
 .mobile-menu__cta { margin-top: 12px; width: 100%; }
+/* В меню кнопка записи — главное действие, поэтому горит всегда:
+   и на телефоне, и в узком окне на компьютере. */
+.mobile-menu .mobile-menu__cta {
+  background: var(--accent-hot);
+  border-color: #ff7a72;
+  color: #fff;
+  text-shadow: 0 0 16px rgba(255, 255, 255, .85), 0 0 34px rgba(255, 255, 255, .4);
+  box-shadow: 0 0 26px -4px rgba(255, 42, 32, .75);
+}
+.mobile-menu .mobile-menu__cta svg { filter: drop-shadow(0 0 6px rgba(255, 255, 255, .8)); }
 
 /* ---------- плавающая кнопка WhatsApp (моб.) — ТЗ §3.4 ---------- */
 .wa-float {

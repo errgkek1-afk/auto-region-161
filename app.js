@@ -222,7 +222,7 @@
       '</div>' +
       '<div class="mobile-menu" id="mobile-menu">' +
         mobileLinks +
-        '<a class="btn btn--cta mobile-menu__cta" href="' + waLink() + '"' + deadAttr(waLink()) + '>' + esc(S.hero.cta) + '</a>' +
+        '<a class="btn btn--cta mobile-menu__cta" href="' + waLink() + '"' + deadAttr(waLink()) + '>' + esc(S.hero.cta) + ic('arrow', { size: 18 }) + '</a>' +
       '</div>' +
     '</header>';
   }
