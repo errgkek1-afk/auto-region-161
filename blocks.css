@@ -949,9 +949,10 @@ input[type="range"].range:focus-visible { box-shadow: 0 0 0 3px rgba(255,42,32,.
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--bg-elevated);
-  transition: border-color .2s, background-color .2s;
+  transition: border-color .2s, background-color .2s, transform .12s ease-out;
 }
 a.rating:hover { border-color: var(--text-dim); background: #1b1214; }
+a.rating:active { transform: scale(.98); }
 .rating__value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
 .rating__stars { display: flex; gap: 2px; color: #ffc531; }
 .rating__counts { display: block; margin-top: 5px; font-size: var(--fs-xs); color: var(--text-dim); }
@@ -972,9 +973,10 @@ a.rating:hover .rating__go { color: var(--text); transform: translateX(3px); }
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--bg-elevated);
-  transition: border-color .2s, background-color .2s;
+  transition: border-color .2s, background-color .2s, transform .12s ease-out;
 }
 a.review:hover { border-color: var(--text-dim); background: #1b1214; }
+a.review:active { transform: scale(.98); }
 .review__top { display: flex; align-items: center; gap: 12px; }
 .review__ava {
   display: flex; align-items: center; justify-content: center;
@@ -1094,6 +1096,30 @@ a.review:hover .review__foot { color: var(--text-muted); }
 }
 .strip__item .photo-stub { width: 100%; height: 100%; }
 
+/* Плавное появление фото после загрузки — вместо резкого выскакивания
+   в уже отведённой рамке.
+
+   ВАЖНО: прячем фото только под классом .js-fade, который ставит на <html>
+   сам скрипт (wireImageFade в app.js). Если скрипт по любой причине не
+   отработает — фото просто видны сразу, без анимации. Без этой страховки
+   сломанный JS означал бы сайт вообще без фотографий. */
+.js-fade .strip__item img,
+.js-fade .compare__figure img,
+.js-fade .person__figure img,
+.js-fade .loc__shot img { opacity: 0; transition: opacity .3s ease; }
+
+.js-fade .strip__item img.is-loaded,
+.js-fade .compare__figure img.is-loaded,
+.js-fade .person__figure img.is-loaded,
+.js-fade .loc__shot img.is-loaded { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-fade .strip__item img,
+  .js-fade .compare__figure img,
+  .js-fade .person__figure img,
+  .js-fade .loc__shot img { opacity: 1; transition: none; }
+}
+
 /* пропорции плиток под каждый блок */
 .strip--faq .strip__item { width: clamp(132px, 30%, 158px); aspect-ratio: 3 / 4; }
 
@@ -1109,13 +1135,23 @@ a.review:hover .review__foot { color: var(--text-muted); }
   background: rgba(11, 7, 8, .82);
   color: var(--text);
   cursor: pointer;
-  transition: background-color .2s, border-color .2s;
+  opacity: 0;
+  pointer-events: none;
+  transition: background-color .2s, border-color .2s, opacity .16s ease;
 }
 .strip__nav:hover { background: var(--accent); border-color: var(--accent); }
 .strip__nav--prev { left: 8px; }
 .strip__nav--next { right: 8px; }
+/* видимость стрелки — отдельно от того, показываем ли их вообще:
+   так логика одинакова и не зависит от медиазапроса ниже */
+.strip__nav.is-visible { opacity: 1; pointer-events: auto; }
+
+/* сами стрелки только там, где есть мышь; на телефоне листают свайпом */
 @media (hover: hover) and (pointer: fine) {
   .strip__nav:not([hidden]) { display: grid; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip__nav { transition: background-color .2s, border-color .2s; }
 }
 
 /* правая колонка */

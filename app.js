@@ -817,6 +817,7 @@
     wireAccordions();
     wireCarousels();
     wireTerms();
+    wireImageFade();
   }
 
   /* ---------- шапка ---------- */
@@ -1054,6 +1055,33 @@
     });
   }
 
+  /* Фото проявляются вместо того, чтобы выскакивать рывком в уже
+     отведённой рамке. Картинку из кеша помечаем сразу — иначе она
+     мигнёт впустую. */
+  function wireImageFade() {
+    var sel = '.strip__item img, .compare__figure img, .person__figure img, .loc__shot img';
+    var imgs = [].slice.call(document.querySelectorAll(sel));
+    if (!imgs.length) return;
+
+    /* Прячем фото только теперь, когда точно знаем, что скрипт работает
+       и сможет их показать. До этого момента они просто видны. */
+    document.documentElement.classList.add('js-fade');
+
+    var show = function (img) { img.classList.add('is-loaded'); };
+
+    imgs.forEach(function (img) {
+      if (img.complete && img.naturalWidth > 0) { show(img); return; }
+      img.addEventListener('load',  function () { show(img); }, { once: true });
+      /* картинка не открылась — всё равно снимаем прозрачность,
+         иначе останется пустое место */
+      img.addEventListener('error', function () { show(img); }, { once: true });
+    });
+
+    /* Последняя подстраховка: что бы ни случилось с событиями загрузки,
+       через 5 секунд показываем всё, что ещё скрыто. */
+    setTimeout(function () { imgs.forEach(show); }, 5000);
+  }
+
   /* Ленты фото (блок 9 и блок 8): стрелки листают на одну плитку,
      прячутся у краёв и когда листать нечего. Свайп работает и без JS. */
   function wireCarousels() {
@@ -1070,8 +1098,11 @@
       function sync() {
         var max = track.scrollWidth - track.clientWidth - 1;
         var scrollable = max > 4;
-        prev.hidden = !scrollable || track.scrollLeft <= 2;
-        next.hidden = !scrollable || track.scrollLeft >= max;
+        /* hidden убирает кнопку из потока целиком, а класс даёт ей
+           плавно проявиться и погаснуть — см. .strip__nav в blocks.css */
+        prev.hidden = next.hidden = !scrollable;
+        prev.classList.toggle('is-visible', scrollable && track.scrollLeft > 2);
+        next.classList.toggle('is-visible', scrollable && track.scrollLeft < max);
       }
       prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
       next.addEventListener('click', function () { track.scrollBy({ left:  step(), behavior: 'smooth' }); });
