@@ -558,7 +558,7 @@
       var empty = !p.name;
       return '<article class="person' + (empty ? ' person--empty' : '') + '">' +
         '<figure class="person__figure">' +
-          photo({ photo: p.photo, photoKind: 'Фото', photoNeed: p.photoNeed }, false) +
+          photo({ photo: p.photo, photoKind: 'Фото', photoNeed: p.photoNeed, w: p.w, h: p.h }, false) +
         '</figure>' +
         '<div>' +
           '<span class="person__role">' + slot(p.role, 'Специфика работы') + '</span>' +
