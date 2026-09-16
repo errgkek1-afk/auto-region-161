@@ -102,6 +102,9 @@
 .hero__hook b { font-weight: 600; letter-spacing: -0.01em; }
 .hero__hook span { color: var(--text-muted); }
 .hero__hook p { font-size: var(--fs-sm); line-height: 1.45; }
+/* Хук с длинной первой фразой: на компьютере серый хвост уходит
+   на свою строку, чтобы не рвался посередине. */
+@media (min-width: 1024px) { .hero__hook--split span { display: block; } }
 
 /* кнопка и счётчик — в одну строку */
 .hero__actions {

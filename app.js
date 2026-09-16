@@ -232,7 +232,7 @@
     var h = S.hero;
 
     var hooks = h.hooks.map(function (x) {
-      return '<li class="hero__hook">' + ic(x.icon, { size: 18 }) +
+      return '<li class="hero__hook' + (x.split ? ' hero__hook--split' : '') + '">' + ic(x.icon, { size: 18 }) +
         '<p><b>' + esc(x.title) + '</b> <span>' + esc(x.text) + '</span></p></li>';
     }).join('');
 
