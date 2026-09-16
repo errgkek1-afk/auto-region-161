@@ -174,19 +174,24 @@ a[data-no-phone] { cursor: default; }
 }
 @media (min-width: 1080px) { .header__inner { gap: 30px; } }
 
-.logo { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.logo__mark {
-  display: grid; place-items: center;
-  width: 30px; height: 30px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: 11px; font-weight: 800; letter-spacing: -0.02em;
+/* Логотип — картинка по своей форме, без рамок и подложек.
+   Высота подобрана под прежний значок, чтобы шапка не выросла. */
+.logo { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.logo__img {
+  width: auto;
+  height: 32px;
+  flex-shrink: 0;
 }
-.logo__name { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
-.logo__title { font-size: var(--fs-sm); font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; }
-.logo__sub { display: none; font-size: var(--fs-xs); color: var(--text-muted); white-space: nowrap; }
-@media (min-width: 560px) { .logo__sub { display: block; } }
+@media (min-width: 560px) { .logo__img { height: 36px; } }
+.logo__sub {
+  display: none;
+  padding-left: 12px;
+  border-left: 1px solid var(--line-strong);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+@media (min-width: 760px) { .logo__sub { display: block; } }
 
 /* меню строго по центру шапки, независимо от ширины лого и правого блока */
 .nav {

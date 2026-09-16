@@ -204,12 +204,13 @@
     return '' +
     '<header class="header" id="site-header">' +
       '<div class="wrap header__inner">' +
-        '<a class="logo" href="#top">' +
-          '<span class="logo__mark">' + esc(S.brand.short) + '</span>' +
-          '<span class="logo__name">' +
-            '<span class="logo__title">' + esc(S.brand.name) + '</span>' +
-            '<span class="logo__sub">' + esc(S.brand.tagline) + '</span>' +
-          '</span>' +
+        '<a class="logo" href="#top" aria-label="' + esc(S.brand.name) + '">' +
+          '<picture>' +
+            '<source type="image/webp" srcset="img/logo.webp 320w, img/logo@2x.webp 640w" sizes="200px">' +
+            '<img class="logo__img" src="img/logo.png" alt="' + esc(S.brand.name) + '" ' +
+              'width="1678" height="825" fetchpriority="high" decoding="async">' +
+          '</picture>' +
+          '<span class="logo__sub">' + esc(S.brand.tagline) + '</span>' +
         '</a>' +
         '<nav class="nav"><ul style="display:flex;gap:24px">' + links + '</ul></nav>' +
         '<div class="header__side">' +
@@ -421,6 +422,7 @@
 
     return '<section class="compare" id="compare"><div class="wrap">' +
       '<h2 class="compare__title">' + accent(c.title) + '</h2>' +
+      (c.sub ? '<p class="compare__sub">' + esc(c.sub) + '</p>' : '') +
       '<div class="compare__grid">' +
         '<div class="compare__table">' +
           '<div class="compare__head"><span>' + esc(c.headThem) + '</span><span>' + esc(c.headUs) + '</span></div>' +
@@ -758,8 +760,11 @@
 
         '<div>' +
           '<div class="footer__brand">' +
-            '<span class="logo__mark">' + esc(S.brand.short) + '</span>' +
-            '<b>' + esc(legal.orgName || S.brand.name) + '</b>' +
+            '<picture>' +
+              '<source type="image/webp" srcset="img/logo.webp">' +
+              '<img class="footer__logo" src="img/logo.png" alt="' + esc(legal.orgName || S.brand.name) + '" ' +
+                'width="1678" height="825" loading="lazy" decoding="async">' +
+            '</picture>' +
           '</div>' +
           '<p class="footer__addr">' + esc(f.address) + '<br>' + esc(f.hours) + '</p>' +
           '<p class="footer__disc">' + esc(f.disclaimer) + '</p>' +
