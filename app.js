@@ -128,6 +128,16 @@
     return c.base + Math.floor(days * c.perDay);
   }
 
+  /* Срок и подпись к фото для состояния первого экрана */
+  function termHtml(st) {
+    var t = esc(st.term);
+    return st.termHref ? '<a href="' + esc(st.termHref) + '">' + t + '</a>' : t;
+  }
+  function capHtml(st) {
+    return '<span class="hero__caption-title">' + esc(st.caption) + '</span>' +
+           '<span class="hero__caption-sub">' + esc(st.sub) + '</span>';
+  }
+
   /* Смена текста «роликом»: старая строка уезжает вверх, новая приходит снизу.
      Обе строки лежат в одной ячейке grid, поэтому вёрстка не дёргается. */
   function roll(box, html) {
@@ -259,7 +269,8 @@
           '<h1 class="hero__title">' + esc(h.title) +
             '<span class="hero__engines">' + esc(h.engines) + '</span>' +
           '</h1>' +
-          '<p class="hero__term roll" id="hero-term" aria-live="polite"></p>' +
+          '<p class="hero__term roll" id="hero-term" aria-live="polite">' +
+            '<span class="roll__line">' + termHtml(h.states[0]) + '</span></p>' +
           '<ul class="hero__hooks">' + hooks + '</ul>' +
           '<div class="hero__actions">' +
             '<a class="btn btn--cta" href="' + wa + '"' + deadAttr(wa) + '>' +
@@ -272,7 +283,8 @@
         '</div>' +
 
         '<div class="hero__media">' +
-          '<div class="roll" id="hero-caption" aria-live="polite"></div>' +
+          '<div class="roll" id="hero-caption" aria-live="polite">' +
+            '<span class="roll__line">' + capHtml(h.states[0]) + '</span></div>' +
           '<figure class="hero__photo">' + slides + '</figure>' +
         '</div>' +
 
@@ -814,6 +826,10 @@
       console.warn('[config] Не задан contacts.phone — кнопки мессенджеров пока не ведут никуда.');
     }
 
+    /* Снимок для поисковиков (prerender.py): нужна чистая разметка
+       без слайдов, часов работы и прочего «живого» состояния. */
+    if (/[?&]prerender\b/.test(location.search)) return;
+
     wireHeader();
     wireHero();
     wireClients();
@@ -860,20 +876,14 @@
     var termBox = document.getElementById('hero-term');
     var capBox = document.getElementById('hero-caption');
     var slides = [].slice.call(document.querySelectorAll('.hero__slide'));
+    /* в разметке уже стоит первое состояние (для поисковиков); очищаем,
+       чтобы при открытии по ссылке ?car= текст не «ехал» */
+    termBox.innerHTML = capBox.innerHTML = '';
 
     var reduced = PREFERS_STILL.matches;
     var idx = 0;
     var timer = null;
     var paused = false;   // пауза от ?car= — до первого действия пользователя
-
-    function termHtml(st) {
-      var t = esc(st.term);
-      return st.termHref ? '<a href="' + esc(st.termHref) + '">' + t + '</a>' : t;
-    }
-    function capHtml(st) {
-      return '<span class="hero__caption-title">' + esc(st.caption) + '</span>' +
-             '<span class="hero__caption-sub">' + esc(st.sub) + '</span>';
-    }
 
     function paint(i) {
       var st = states[i];
