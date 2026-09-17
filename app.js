@@ -216,9 +216,9 @@
       '<div class="wrap header__inner">' +
         '<a class="logo" href="#top" aria-label="' + esc(S.brand.name) + '">' +
           '<picture>' +
-            '<source type="image/webp" srcset="img/logo.webp 320w, img/logo@2x.webp 640w" sizes="200px">' +
-            '<img class="logo__img" src="img/logo.png" alt="' + esc(S.brand.name) + '" ' +
-              'width="1678" height="825" fetchpriority="high" decoding="async">' +
+            '<source type="image/webp" srcset="img/logo.webp?v=2 320w, img/logo@2x.webp?v=2 640w" sizes="200px">' +
+            '<img class="logo__img" src="img/logo.png?v=2" alt="' + esc(S.brand.name) + '" ' +
+              'width="1673" height="840" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<span class="logo__sub">' + esc(S.brand.tagline) + '</span>' +
         '</a>' +
@@ -227,7 +227,7 @@
           '<span class="header__hours" id="work-status"><span class="header__dot"></span>' + esc(S.hours) + '</span>' +
           phone +
           '<a class="btn btn--soft btn--sm header__cta" href="' + waLink() + '"' + deadAttr(waLink()) + '>' + esc(S.headerCta) + '</a>' +
-          '<button class="burger" id="burger" aria-label="Меню" aria-expanded="false">' + ic('menu', { size: 20 }) + '</button>' +
+          '<button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="mobile-menu">' + ic('menu', { size: 20 }) + '</button>' +
         '</div>' +
       '</div>' +
       '<div class="mobile-menu" id="mobile-menu">' +
@@ -766,6 +766,7 @@
     if (links.avito) net += '<a href="' + esc(links.avito) + '" target="_blank" rel="noopener">Авито</a>';
 
     var reqs = [];
+    if (legal.ipName) reqs.push(esc(legal.ipName));
     if (legal.ogrnip) reqs.push('ОГРНИП ' + esc(legal.ogrnip));
     if (legal.inn)    reqs.push('ИНН ' + esc(legal.inn));
     if (legal.okpo)   reqs.push('ОКПО ' + esc(legal.okpo));
@@ -776,9 +777,9 @@
         '<div>' +
           '<div class="footer__brand">' +
             '<picture>' +
-              '<source type="image/webp" srcset="img/logo.webp">' +
-              '<img class="footer__logo" src="img/logo.png" alt="' + esc(legal.orgName || S.brand.name) + '" ' +
-                'width="1678" height="825" loading="lazy" decoding="async">' +
+              '<source type="image/webp" srcset="img/logo.webp?v=2">' +
+              '<img class="footer__logo" src="img/logo.png?v=2" alt="' + esc(legal.orgName || S.brand.name) + '" ' +
+                'width="1673" height="840" loading="lazy" decoding="async">' +
             '</picture>' +
           '</div>' +
           '<p class="footer__addr">' + esc(f.address) + '<br>' + esc(f.hours) + '</p>' +
@@ -897,7 +898,7 @@
 
     function schedule() {
       clearTimeout(timer);
-      if (reduced || paused || document.hidden) return;
+      if (reduced || paused || held || document.hidden) return;
       var ms = C.hero.durations[states[idx].key] || 8000;
       timer = setTimeout(function () {
         idx = (idx + 1) % states.length;
@@ -905,6 +906,19 @@
         schedule();
       }, ms);
     }
+
+    /* Пока на первом экране курсор или фокус клавиатуры, слайды стоят:
+       человек читает — текст не должен смениться у него под носом. */
+    var held = false;
+    var hero = termBox.closest('section');
+    var hold = function () { held = true; clearTimeout(timer); };
+    var release = function () { held = false; schedule(); };
+    hero.addEventListener('mouseenter', hold);
+    hero.addEventListener('mouseleave', release);
+    hero.addEventListener('focusin', hold);
+    hero.addEventListener('focusout', function (e) {
+      if (!hero.contains(e.relatedTarget)) release();
+    });
 
     /* ?car=simple|china|commercial — открыть на состоянии и встать на паузу */
     var carParam = new URLSearchParams(location.search).get('car');
@@ -947,6 +961,10 @@
     new IntersectionObserver(function (entries) {
       track.classList.toggle('is-paused', !entries[0].isIntersecting);
     }).observe(track);
+    /* нажатие останавливает ленту, повторное — запускает */
+    track.parentElement.addEventListener('click', function () {
+      track.classList.toggle('is-held');
+    });
   }
 
   /* ---------- блок 3: три подблока ---------- */

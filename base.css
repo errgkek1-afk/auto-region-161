@@ -70,7 +70,7 @@ h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; }
 }
 .btn--cta:hover,
 .btn--cta:focus-visible {
-  background: var(--accent-hot);
+  background: var(--accent-btn);
   border-color: #ff7a72;
   color: #fff;
   text-shadow: 0 0 16px rgba(255, 255, 255, .85), 0 0 34px rgba(255, 255, 255, .4);
@@ -92,7 +92,7 @@ h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; }
 }
 .btn--soft:hover,
 .btn--soft:focus-visible {
-  background: var(--accent-hot);
+  background: var(--accent-btn);
   border-color: #ff7a72;
   color: #fff;
   text-shadow: 0 0 14px rgba(255, 255, 255, .8);
@@ -124,7 +124,7 @@ a[data-no-phone] { cursor: default; }
    поэтому там она включена постоянно. Только для сенсорных экранов. */
 @media (hover: none), (pointer: coarse) {
   .btn--cta {
-    background: var(--accent-hot);
+    background: var(--accent-btn);
     border-color: #ff7a72;
     color: #fff;
     text-shadow: 0 0 16px rgba(255, 255, 255, .85), 0 0 34px rgba(255, 255, 255, .4);
@@ -132,7 +132,7 @@ a[data-no-phone] { cursor: default; }
   }
   .btn--cta svg { filter: drop-shadow(0 0 6px rgba(255, 255, 255, .8)); }
   .btn--soft {
-    background: var(--accent-hot);
+    background: var(--accent-btn);
     border-color: #ff7a72;
     color: #fff;
     text-shadow: 0 0 14px rgba(255, 255, 255, .8);
@@ -220,7 +220,7 @@ a[data-no-phone] { cursor: default; }
 
 .burger {
   display: grid; place-items: center; flex-shrink: 0;
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   color: var(--text);
@@ -270,7 +270,7 @@ a[data-no-phone] { cursor: default; }
 /* В меню кнопка записи — главное действие, поэтому горит всегда:
    и на телефоне, и в узком окне на компьютере. */
 .mobile-menu .mobile-menu__cta {
-  background: var(--accent-hot);
+  background: var(--accent-btn);
   border-color: #ff7a72;
   color: #fff;
   text-shadow: 0 0 16px rgba(255, 255, 255, .85), 0 0 34px rgba(255, 255, 255, .4);

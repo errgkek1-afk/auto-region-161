@@ -58,6 +58,17 @@
 
 /* ---------- левая колонка ---------- */
 .hero__title { font-size: var(--fs-display); letter-spacing: -0.038em; text-wrap: balance; }
+/* Самые узкие телефоны (320 px): строки, которые обычно стоят в одну
+   линию, здесь переносятся — иначе страница уезжала вбок. От 360 px всё как было. */
+@media (max-width: 350px) {
+  .hero__title { font-size: 2rem; }
+  .hero__engines, .hero__counter span { white-space: normal; }
+  .hero__engines { font-size: .8rem; }
+  .hero__counter { flex-wrap: wrap; justify-content: center; }
+  .hero__inner > * { min-width: 0; }
+  .calc__out { grid-template-columns: minmax(0, 1fr); }
+  .calc__go { white-space: normal; }
+}
 .hero__engines {
   display: block;
   margin-top: 16px;
@@ -220,7 +231,8 @@
    поэтому лента идёт по кругу без разрыва и пустоты. */
 .clients__group { display: flex; align-items: center; gap: 44px; padding-right: 44px; }
 .clients__strip:hover .clients__track,
-.clients__track.is-paused { animation-play-state: paused; }
+.clients__track.is-paused,
+.clients__track.is-held { animation-play-state: paused; }   /* is-held — остановили нажатием */
 .clients__item {
   display: flex; align-items: center; gap: 40px;
   font-size: clamp(0.9rem, 1.15vw, 1.05rem);
@@ -486,6 +498,9 @@
   text-align: center;
 }
 .panel__ctas .btn { max-width: 100%; }
+/* На телефонах уже 400 px длинная подпись в одну строку не влезает
+   и сдвигала всю страницу вбок — там разрешаем перенос. */
+@media (max-width: 400px) { .panel__ctas .btn { white-space: normal; } }
 
 /* ---------- фото в скруглённых плашках (блок 3) ----------
    Плашка скруглена так же, как заглушка и кадр на первом экране.
@@ -693,6 +708,7 @@
 @media (min-width: 1024px) { .calc__title { white-space: nowrap; } }
 
 .calc__grid { display: grid; gap: clamp(24px, 3vw, 40px); margin-top: clamp(28px, 4vw, 48px); }
+.calc__grid > * { min-width: 0; }   /* колонки сжимаются по экрану, а не распирают его */
 @media (min-width: 980px) { .calc__grid { grid-template-columns: 1fr 1fr; align-items: start; } }
 
 /* ---------- ползунки ---------- */
@@ -741,7 +757,7 @@ input[type="range"].range::-moz-range-thumb {
   cursor: grab;
 }
 input[type="range"].range:active::-webkit-slider-thumb { cursor: grabbing; }
-input[type="range"].range:focus-visible { box-shadow: 0 0 0 3px rgba(255,42,32,.35); }
+input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); outline-offset: 8px; }
 
 /* ---------- результат ---------- */
 .calc__out {
