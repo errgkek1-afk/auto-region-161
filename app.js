@@ -898,7 +898,7 @@
 
     function schedule() {
       clearTimeout(timer);
-      if (reduced || paused || held || document.hidden) return;
+      if (reduced || paused || document.hidden) return;
       var ms = C.hero.durations[states[idx].key] || 8000;
       timer = setTimeout(function () {
         idx = (idx + 1) % states.length;
@@ -906,19 +906,6 @@
         schedule();
       }, ms);
     }
-
-    /* Пока на первом экране курсор или фокус клавиатуры, слайды стоят:
-       человек читает — текст не должен смениться у него под носом. */
-    var held = false;
-    var hero = termBox.closest('section');
-    var hold = function () { held = true; clearTimeout(timer); };
-    var release = function () { held = false; schedule(); };
-    hero.addEventListener('mouseenter', hold);
-    hero.addEventListener('mouseleave', release);
-    hero.addEventListener('focusin', hold);
-    hero.addEventListener('focusout', function (e) {
-      if (!hero.contains(e.relatedTarget)) release();
-    });
 
     /* ?car=simple|china|commercial — открыть на состоянии и встать на паузу */
     var carParam = new URLSearchParams(location.search).get('car');
