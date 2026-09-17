@@ -779,6 +779,12 @@ input[type="range"].range:focus-visible { box-shadow: 0 0 0 3px rgba(255,42,32,.
   color: var(--green);
   font-variant-numeric: tabular-nums;
 }
+.calc__disclaimer {
+  margin-top: 12px;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
 .calc__save i { font-size: var(--fs-sm); font-style: normal; color: var(--text-muted); }
 .calc__go {
   margin-top: 10px;

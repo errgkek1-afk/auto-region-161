@@ -502,7 +502,10 @@
           slider('calc-petrol', c.fields.petrolPrice, C.calc.petrol) +
         '</div>' +
 
-        '<div class="calc__out" id="calc-out"></div>' +
+        '<div class="calc__side">' +
+          '<div class="calc__out" id="calc-out"></div>' +
+          (c.disclaimer ? '<p class="calc__disclaimer">' + esc(c.disclaimer) + '</p>' : '') +
+        '</div>' +
       '</div>' +
 
       '<div class="acc">' + acc + '</div>' +
@@ -798,7 +801,7 @@
       '<div class="footer__bottom">' +
         '<span>© ' + new Date().getFullYear() + ' ' + esc(legal.orgName || S.brand.name) +
           (reqs.length ? ' · ' + reqs.join(' · ') : '') + ' · Карта © OpenStreetMap</span>' +
-        '<a href="#">' + esc(f.privacyLabel) + '</a>' +
+        '<a href="' + esc(f.privacyHref || '#') + '">' + esc(f.privacyLabel) + '</a>' +
       '</div>' +
     '</div></footer>';
   }
