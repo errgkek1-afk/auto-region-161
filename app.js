@@ -27,6 +27,12 @@
   }
   function tgLink() { return C.contacts.telegram ? 'https://t.me/' + C.contacts.telegram : '#'; }
   function maxLink() { return C.contacts.max || '#'; }
+  /* Кнопка записи: открывает окно заявки. source — откуда нажали (видно в заявке). */
+  function leadBtn(cls, label, source, arrow, note) {
+    return '<a class="btn ' + cls + '" href="#zapis" data-lead="' + esc(source) + '"' +
+      (note ? ' data-lead-note="' + esc(note) + '"' : '') + '>' +
+      esc(label) + (arrow ? ic('arrow', { size: arrow }) : '') + '</a>';
+  }
   function deadAttr(href) { return href === '#' ? ' data-no-phone aria-disabled="true"' : ' target="_blank" rel="noopener"'; }
 
   /* {фигурные скобки} -> ярко-белым, остальной текст приглушённый.
@@ -226,13 +232,13 @@
         '<div class="header__side">' +
           '<span class="header__hours" id="work-status"><span class="header__dot"></span>' + esc(S.hours) + '</span>' +
           phone +
-          '<a class="btn btn--soft btn--sm header__cta" href="' + waLink() + '"' + deadAttr(waLink()) + '>' + esc(S.headerCta) + '</a>' +
+          leadBtn('btn--soft btn--sm header__cta', S.headerCta, 'шапка') +
           '<button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="mobile-menu">' + ic('menu', { size: 20 }) + '</button>' +
         '</div>' +
       '</div>' +
       '<div class="mobile-menu" id="mobile-menu">' +
         mobileLinks +
-        '<a class="btn btn--cta mobile-menu__cta" href="' + waLink() + '"' + deadAttr(waLink()) + '>' + esc(S.hero.cta) + ic('arrow', { size: 18 }) + '</a>' +
+        leadBtn('btn--cta mobile-menu__cta', S.hero.cta, 'меню', 18) +
       '</div>' +
     '</header>';
   }
@@ -250,8 +256,6 @@
       return '<div class="hero__slide' + (i === 0 ? ' is-active' : '') +
         '" data-slide="' + esc(st.key) + '">' + photo(st, i === 0) + '</div>';
     }).join('');
-
-    var wa = waLink();
 
     return '' +
     '<section class="hero" id="top">' +
@@ -273,8 +277,7 @@
             '<span class="roll__line">' + termHtml(h.states[0]) + '</span></p>' +
           '<ul class="hero__hooks">' + hooks + '</ul>' +
           '<div class="hero__actions">' +
-            '<a class="btn btn--cta" href="' + wa + '"' + deadAttr(wa) + '>' +
-              esc(h.cta) + ic('arrow', { size: 18 }) + '</a>' +
+            leadBtn('btn--cta', h.cta, 'первый экран', 18) +
             '<p class="hero__counter">' +
               '<b id="hero-counter">' + fmt(installCount()) + '</b>' +
               '<span>' + esc(h.counterLabel) + '</span>' +
@@ -357,9 +360,7 @@
       '</' + revTag + '>' : '';
 
     var ctas = b.ctas.map(function (x) {
-      var href = waLink(x.topic);
-      return '<a class="btn btn--cta" href="' + href + '"' + deadAttr(href) + '>' +
-        esc(x.label) + ic('arrow', { size: 16 }) + '</a>';
+      return leadBtn('btn--cta', x.label, 'блок «' + b.tab + '»', 16);
     }).join('');
 
     /* Строка-вывод и сноска лежат отдельно от колонки — во всю ширину,
@@ -541,8 +542,8 @@
         '<b>' + fmt(month) + ' / ' + fmt(month * 12) + ' ₽</b></div>';
     };
 
-    var wa = waLink('Здравствуйте! Хочу узнать цену ГБО для своей машины. Мой расчёт: ' +
-      fmt(r.km) + ' км/мес, расход ' + r.cons + ' л/100, экономия ' + fmt(r.save) + ' ₽/мес.');
+    var calcNote = 'Мой расчёт: ' + fmt(r.km) + ' км/мес, расход ' + r.cons +
+      ' л/100, экономия ' + fmt(r.save) + ' ₽/мес.';
 
     out.innerHTML =
       '<div class="calc__legend">в месяц / за год</div>' +
@@ -553,8 +554,7 @@
         '<b>' + fmt(r.save) + ' ₽</b>' +
         '<i>' + esc(R.saveYear) + ' — ' + fmt(r.save * 12) + ' ₽</i>' +
       '</div>' +
-      '<a class="btn btn--cta calc__go" href="' + wa + '"' + deadAttr(wa) + '>' +
-        esc(c.cta.label) + ic('arrow', { size: 16 }) + '</a>';
+      leadBtn('btn--cta calc__go', c.cta.label, 'калькулятор', 16, calcNote);
   }
 
   /* =====================  БЛОК 6 — Мастера  ===================== */
@@ -645,9 +645,7 @@
     }).join('');
 
     var buttons = r.cta.buttons.map(function (b) {
-      var href = waLink(b.topic);
-      return '<a class="btn btn--cta" href="' + href + '"' + deadAttr(href) + '>' +
-        esc(b.label) + ic('arrow', { size: 16 }) + '</a>';
+      return leadBtn('btn--cta', b.label, 'отзывы', 16);
     }).join('');
 
     return '<section class="reviews" id="reviews"><div class="wrap">' +
@@ -741,45 +739,60 @@
   }
 
   /* =====================  БЛОК 10 — Форма записи  ===================== */
-  function renderForm() {
+  /* Форма заявки — одна разметка на низ страницы и на всплывающее окно.
+     [[текст|ссылка]] в подписях галочек — ссылка на документ в новой вкладке. */
+  function leadFormHtml(key) {
     var f = S.form;
-    var wa = waLink(f.submitTopic);
-    /* [[текст|ссылка]] в подписях галочек — ссылка на документ в новой вкладке */
     var linked = function (t) {
       return esc(t).replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, function (_, text, href) {
         return '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
       });
     };
+    return '<form class="lead" data-lead-form="' + key + '" novalidate>' +
+      '<label class="lead__field"><span>' + esc(f.nameLabel) + ' <i>— необязательно</i></span>' +
+        '<input type="text" name="name" autocomplete="name" maxlength="60" placeholder="' + esc(f.nameHint) + '"></label>' +
+      '<label class="lead__field"><span>' + esc(f.phoneLabel) + ' <i class="lead__req">*</i></span>' +
+        '<input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required></label>' +
+      '<em class="lead__err" data-err="phone" hidden>' + esc(f.errPhone) + '</em>' +
+      '<label class="lead__check"><input type="checkbox" name="pd" required><span>' + linked(f.consentPd) + '</span></label>' +
+      '<em class="lead__err" data-err="pd" hidden>' + esc(f.errPd) + '</em>' +
+      '<label class="lead__check"><input type="checkbox" name="ads"><span>' + linked(f.consentAds) + '</span></label>' +
+      '<div class="lead__action">' +
+        '<button type="submit" class="btn lead__submit">' +
+          '<span class="lead__label">' + esc(f.submit) + '</span>' +
+          '<span class="lead__tick">' + ic('check', { size: 26 }) + '</span>' +
+        '</button>' +
+      '</div>' +
+      '<em class="lead__err" data-err="send" hidden>' + esc(f.errSend) + '</em>' +
+      '<div class="lead__after" hidden>' +
+        '<p class="lead__done">' + esc(f.doneText) + '</p>' +
+        '<a class="btn lead__wa" data-lead-wa href="#" target="_blank" rel="noopener">' +
+          ic('whatsapp', { size: 18 }) + esc(f.waLabel) + '</a>' +
+      '</div>' +
+    '</form>';
+  }
 
+  function renderForm() {
     return '<section class="form" id="zapis"><div class="wrap">' +
       '<div class="form__card">' +
-        '<h2 class="form__lead">' + esc(f.lead) + '</h2>' +
-        '<form class="lead" id="lead-form" novalidate>' +
-          '<div class="lead__fields">' +
-            '<label class="lead__field"><span>' + esc(f.nameLabel) + ' <i>— необязательно</i></span>' +
-              '<input type="text" name="name" autocomplete="name" maxlength="60" placeholder="' + esc(f.nameHint) + '"></label>' +
-            '<label class="lead__field"><span>' + esc(f.phoneLabel) + ' <i class="lead__req">*</i></span>' +
-              '<input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required>' +
-              '<em class="lead__err" data-err="phone" hidden>' + esc(f.errPhone) + '</em></label>' +
-          '</div>' +
-          '<label class="lead__check"><input type="checkbox" name="pd" required><span>' + linked(f.consentPd) + '</span></label>' +
-          '<em class="lead__err" data-err="pd" hidden>' + esc(f.errPd) + '</em>' +
-          '<label class="lead__check"><input type="checkbox" name="ads"><span>' + linked(f.consentAds) + '</span></label>' +
-          '<button type="submit" class="btn btn--cta form__submit">' + esc(f.submit) + ic('arrow', { size: 17 }) + '</button>' +
-          '<em class="lead__err" data-err="send" hidden>' + esc(f.errSend) + '</em>' +
-          '<p class="lead__or">' + esc(f.or) + '</p>' +
-          '<a class="btn lead__wa" href="' + wa + '"' + deadAttr(wa) + '>' + ic('whatsapp', { size: 18 }) + esc(f.waLabel) + '</a>' +
-        '</form>' +
-        '<div class="lead__done" id="lead-done" hidden>' +
-          '<span class="lead__tick">' + ic('check', { size: 26 }) + '</span>' +
-          '<b class="lead__done-title">' + esc(f.doneTitle) + '</b>' +
-          '<p class="lead__done-text">' + esc(f.doneText) + '</p>' +
-          '<a class="btn btn--cta lead__wa-done" id="lead-wa" href="#" target="_blank" rel="noopener">' +
-            ic('whatsapp', { size: 18 }) + esc(f.waLabel) + '</a>' +
-        '</div>' +
-        '<p class="form__note">' + lede(f.note) + '</p>' +
+        '<h2 class="form__lead">' + esc(S.form.lead).replace(' — ', '&nbsp;— ').replace(/\n/g, '<br>') + '</h2>' +
+        leadFormHtml('низ страницы') +
       '</div>' +
     '</div></section>';
+  }
+
+  /* Всплывающее окно заявки. Открывают его все кнопки записи (data-lead). */
+  function renderLeadModal() {
+    var f = S.form;
+    return '<div class="modal" id="lead-modal" hidden>' +
+      '<div class="modal__backdrop" data-close></div>' +
+      '<div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">' +
+        '<button type="button" class="modal__close" data-close aria-label="Закрыть">' + ic('close', { size: 20 }) + '</button>' +
+        '<h2 class="modal__title" id="lead-modal-title">' + esc(f.popTitle) + '</h2>' +
+        '<p class="modal__sub">' + esc(f.popSub) + '</p>' +
+        leadFormHtml('окно') +
+      '</div>' +
+    '</div>';
   }
 
   /* =====================  БЛОК 11 — Подвал  ===================== */
@@ -854,6 +867,7 @@
       renderHeader() +
       '<main>' + renderHero() + renderClients() + renderTuning() + renderCompare() + renderCalc() + renderTeam() + renderReviews() + renderFaq() + renderLocation() + renderForm() + '</main>' +
       renderFooter() +
+      renderLeadModal() +
       renderWaFloat();
 
     if (!C.contacts.phone) {
@@ -874,7 +888,7 @@
     wireTerms();
     wireImageFade();
     wireConsent();
-    wireLeadForm();
+    wireLeadForms();
   }
 
   /* ---------- шапка ---------- */
@@ -1253,18 +1267,49 @@
     if (choice !== 'yes' && choice !== 'no') show(false);
   }
 
-  /* ---------- форма заявки ----------
-     Имя — по желанию, телефон — обязательно, согласие на обработку данных —
-     обязательно, согласие на рекламу — по желанию (без него заявка уходит).
-     После отправки: галочка «Заявка принята» и кнопка WhatsApp
-     с готовым сообщением. */
-  function wireLeadForm() {
-    var form = document.getElementById('lead-form');
-    if (!form) return;
+  /* ---------- заявки: окно и формы ----------
+     Кнопка «Оставить заявку» тусклая, пока не введён номер целиком,
+     и загорается, как только номер введён. Галочка согласия проверяется
+     уже при нажатии. После отправки кнопка сворачивается в галочку
+     и появляется кнопка WhatsApp с готовым сообщением. */
+  function wireLeadForms() {
     var f = S.form;
-    var done = document.getElementById('lead-done');
-    var phone = form.elements.phone;
-    var err = function (k, on) { form.querySelector('[data-err=' + k + ']').hidden = !on; };
+    var modal = document.getElementById('lead-modal');
+    var lastSource = '', lastNote = '';
+    var opener = null;
+
+    function openModal(source, note) {
+      lastSource = source || '';
+      lastNote = note || '';
+      opener = document.activeElement;
+      modal.hidden = false;
+      document.documentElement.classList.add('is-modal');
+      requestAnimationFrame(function () { modal.classList.add('is-open'); });
+      if (window.matchMedia('(hover: hover)').matches) {
+        var first = modal.querySelector('input[name=name]');
+        if (first && !first.closest('.lead').classList.contains('is-sent')) first.focus();
+      }
+    }
+    function closeModal() {
+      modal.classList.remove('is-open');
+      document.documentElement.classList.remove('is-modal');
+      setTimeout(function () { modal.hidden = true; }, PREFERS_STILL.matches ? 0 : 200);
+      if (opener && opener.focus) opener.focus();
+    }
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-lead]') : null;
+      if (b) {
+        e.preventDefault();
+        var menu = document.getElementById('mobile-menu');
+        if (menu && menu.classList.contains('is-open')) document.getElementById('burger').click();
+        openModal(b.dataset.lead, b.dataset.leadNote);
+        return;
+      }
+      if (e.target.closest && e.target.closest('[data-close]') && modal.contains(e.target)) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
 
     /* номер оформляется по ходу ввода: +7 (900) 123-45-67 */
     var digits = function (v) {
@@ -1273,67 +1318,77 @@
       if (d && d[0] !== '7') d = '7' + d;
       return d.slice(0, 11);
     };
-    phone.addEventListener('input', function () {
-      var d = digits(phone.value);
-      var p = d ? '+7' : '';
-      if (d.length > 1) p += ' (' + d.slice(1, 4);
-      if (d.length > 4) p += ') ' + d.slice(4, 7);
-      if (d.length > 7) p += '-' + d.slice(7, 9);
-      if (d.length > 9) p += '-' + d.slice(9, 11);
-      phone.value = p;
-      err('phone', false);
-    });
-    form.elements.pd.addEventListener('change', function () { err('pd', false); });
 
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var d = digits(phone.value);
-      var okPhone = d.length === 11;
-      var okPd = form.elements.pd.checked;
-      err('phone', !okPhone);
-      err('pd', !okPd);
-      err('send', false);
-      if (!okPhone) { phone.focus(); return; }
-      if (!okPd) return;
+    document.querySelectorAll('[data-lead-form]').forEach(function (form) {
+      var inModal = modal.contains(form);
+      var phone = form.elements.phone;
+      var btn = form.querySelector('.lead__submit');
+      var err = function (k, on) { form.querySelector('[data-err=' + k + ']').hidden = !on; };
+      var ready = function () { return digits(phone.value).length === 11; };
 
-      var name = form.elements.name.value.trim();
-      var lead = {
-        name: name,
-        phone: '+' + d,
-        pdConsent: true,
-        adsConsent: form.elements.ads.checked,
-        page: location.href,
-        time: new Date().toISOString(),
-      };
-      var btn = form.querySelector('button[type=submit]');
-      btn.disabled = true;
+      phone.addEventListener('input', function () {
+        var d = digits(phone.value);
+        var p = d ? '+7' : '';
+        if (d.length > 1) p += ' (' + d.slice(1, 4);
+        if (d.length > 4) p += ') ' + d.slice(4, 7);
+        if (d.length > 7) p += '-' + d.slice(7, 9);
+        if (d.length > 9) p += '-' + d.slice(9, 11);
+        phone.value = p;
+        btn.classList.toggle('is-ready', ready());
+        if (ready()) err('phone', false);
+      });
+      form.elements.pd.addEventListener('change', function () { err('pd', false); });
 
-      var finish = function () {
-        var text = f.doneWa + (name ? ' Меня зовут ' + name + '.' : '');
-        document.getElementById('lead-wa').href = waLink(text);
-        form.hidden = true;
-        done.hidden = false;
-        if (window.arMetrika && window.arMetrika.done && window.ym) {
-          window.ym(Number(C.metrika.id), 'reachGoal', 'lead');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (form.classList.contains('is-sent') || btn.disabled) return;
+        if (!ready()) { err('phone', true); phone.focus(); return; }
+        if (!form.elements.pd.checked) { err('pd', true); return; }
+        err('send', false);
+
+        var name = form.elements.name.value.trim();
+        var source = inModal ? (lastSource || 'окно') : form.dataset.leadForm;
+        var note = inModal ? lastNote : '';
+        var lead = {
+          name: name,
+          phone: '+' + digits(phone.value),
+          pdConsent: true,
+          adsConsent: form.elements.ads.checked,
+          source: source,
+          note: note,
+          page: location.href,
+          time: new Date().toISOString(),
+        };
+        btn.disabled = true;
+
+        var finish = function () {
+          var text = f.doneWa + (name ? ' Меня зовут ' + name + '.' : '') + (note ? ' ' + note : '');
+          form.querySelector('[data-lead-wa]').href = waLink(text);
+          form.classList.add('is-sent');
+          setTimeout(function () { form.querySelector('.lead__after').hidden = false; },
+                     PREFERS_STILL.matches ? 0 : 380);
+          if (window.arMetrika && window.arMetrika.done && window.ym) {
+            window.ym(Number(C.metrika.id), 'reachGoal', 'lead');
+          }
+        };
+
+        var url = C.leads && C.leads.endpoint;
+        if (!url) {
+          console.warn('[leads] Не задан адрес для заявок (config.js → leads.endpoint) — заявка не сохранена.', lead);
+          finish();
+          return;
         }
-      };
-
-      var url = C.leads && C.leads.endpoint;
-      if (!url) {
-        console.warn('[leads] Не задан адрес для заявок (config.js → leads.endpoint) — заявка не сохранена.');
-        finish();
-        return;
-      }
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(lead),
-      }).then(function (r) {
-        if (!r.ok) throw new Error(r.status);
-        finish();
-      }).catch(function () {
-        err('send', true);
-        btn.disabled = false;
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lead),
+        }).then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          finish();
+        }).catch(function () {
+          err('send', true);
+          btn.disabled = false;
+        });
       });
     });
   }
