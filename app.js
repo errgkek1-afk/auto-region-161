@@ -1203,9 +1203,14 @@
       bar.hidden = true;
       if (analytics) { window.arMetrika(); return; }
       /* отказ: стираем cookie Метрики; если она уже работала — перезагружаем без неё */
+      /* Метрика ставит cookie на домен целиком — стираем для всех его уровней */
+      var host = location.hostname.split('.');
+      var domains = [''];
+      for (var i = 0; i < host.length - 1; i++) domains.push('; domain=.' + host.slice(i).join('.'));
       document.cookie.split(';').forEach(function (c) {
         var name = c.split('=')[0].trim();
-        if (/^_ym/.test(name)) document.cookie = name + '=; Max-Age=0; path=/';
+        if (!/^_ym/.test(name)) return;
+        domains.forEach(function (d) { document.cookie = name + '=; Max-Age=0; path=/' + d; });
       });
       if (on()) location.reload();
     }
