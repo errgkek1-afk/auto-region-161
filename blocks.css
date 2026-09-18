@@ -1278,6 +1278,47 @@ a.review:hover .review__foot { color: var(--text-muted); }
   color: var(--text-dim);
 }
 
+/* ---------- форма заявки ---------- */
+.lead { display: grid; gap: 14px; width: 100%; max-width: 560px; justify-items: start; }
+.lead[hidden], .lead__done[hidden] { display: none; }
+.lead__fields { display: grid; gap: 12px; width: 100%; }
+@media (min-width: 560px) { .lead__fields { grid-template-columns: 1fr 1fr; } }
+.lead__field { display: grid; gap: 6px; }
+.lead__field span { font-size: var(--fs-sm); color: var(--text-muted); }
+.lead__field span i { font-style: normal; color: var(--text-dim); }
+.lead__field .lead__req { color: var(--accent-hot); }
+.lead__field input {
+  width: 100%; height: 52px; padding: 0 16px;
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  font-size: 1rem;   /* от 16 px — чтобы iPhone не увеличивал страницу при вводе */
+  transition: border-color .15s;
+}
+.lead__field input::placeholder { color: var(--text-dim); }
+.lead__field input:focus { outline: none; border-color: var(--accent-hot); }
+.lead__check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.lead__check input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--accent-btn); }
+.lead__check span { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-muted); }
+.lead__check a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.lead__err { font-size: var(--fs-xs); font-style: normal; color: #ff8a82; }
+.lead__err[hidden] { display: none; }
+.lead .form__submit:disabled { opacity: .6; cursor: default; }
+.lead__or { font-size: var(--fs-sm); color: var(--text-dim); }
+.lead__wa {
+  gap: 10px; background: var(--wa); color: #fff; border: 1px solid var(--wa);
+}
+.lead__wa:hover { background: var(--wa-hover); border-color: var(--wa-hover); }
+
+/* после отправки */
+.lead__done { display: grid; gap: 12px; justify-items: start; }
+.lead__tick {
+  display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
+  background: var(--green-soft); border: 1px solid var(--green-line); color: var(--green);
+}
+.lead__done-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+.lead__done-text { font-size: var(--fs-sm); color: var(--text-muted); max-width: 44ch; }
+.lead__wa-done { gap: 10px; }
+
 /* =====================================================================
    БЛОК 11 — Подвал
    ===================================================================== */
@@ -1308,5 +1349,9 @@ a.review:hover .review__foot { color: var(--text-muted); }
 }
 .footer__bottom a { display: inline-block; padding-block: 12px; color: var(--text-dim); transition: color .15s; }
 .footer__bottom a:hover { color: var(--text-muted); }
+.footer__links { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.footer__cookie { padding-block: 12px; font-size: inherit; color: var(--text-dim); transition: color .15s; }
+.footer__cookie:hover { color: var(--text-muted); }
+.footer__cookie[hidden] { display: none; }
 
 

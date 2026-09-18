@@ -296,6 +296,40 @@ a[data-no-phone] { cursor: default; }
 
 .text-accent { color: var(--accent-hot); }
 
+/* ---------- уведомление о cookie ----------
+   Скромная карточка внизу: не крупнее кнопок рядом, над кнопкой WhatsApp. */
+.cookie {
+  position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 70;
+  display: grid; gap: 12px;
+  padding: 16px 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .55);
+}
+.cookie[hidden] { display: none; }
+@media (min-width: 640px) { .cookie { right: auto; max-width: 440px; } }
+.cookie__text { font-size: var(--fs-xs); line-height: 1.5; color: var(--text-muted); }
+.cookie__text a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.cookie__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.cookie__ghost { border: 1px solid var(--line-strong); color: var(--text-muted); }
+.cookie__ghost:hover { color: var(--text); border-color: var(--text-dim); }
+.cookie__link {
+  padding: 8px 4px; font-size: var(--fs-sm); color: var(--text-muted);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.cookie__link:hover { color: var(--text); }
+/* второй экран уведомления — выбор по видам cookie */
+.cookie__settings { display: none; gap: 12px; }
+.cookie.is-settings .cookie__main { display: none; }
+.cookie.is-settings .cookie__settings { display: grid; }
+.cookie__title { font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
+.cookie__opt { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.cookie__opt input { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent-btn); }
+.cookie__opt input:disabled { opacity: .6; }
+.cookie__opt span { font-size: var(--fs-xs); line-height: 1.45; color: var(--text-muted); }
+.cookie__opt b { display: block; font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
+
 /* ---------- утилиты ---------- */
 .visually-hidden {
   position: absolute; width: 1px; height: 1px;

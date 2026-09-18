@@ -744,12 +744,39 @@
   function renderForm() {
     var f = S.form;
     var wa = waLink(f.submitTopic);
+    /* [[текст|ссылка]] в подписях галочек — ссылка на документ в новой вкладке */
+    var linked = function (t) {
+      return esc(t).replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, function (_, text, href) {
+        return '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
+      });
+    };
 
     return '<section class="form" id="zapis"><div class="wrap">' +
       '<div class="form__card">' +
         '<h2 class="form__lead">' + esc(f.lead) + '</h2>' +
-        '<a class="btn btn--cta form__submit" href="' + wa + '"' + deadAttr(wa) + '>' +
-          esc(f.submit) + ic('arrow', { size: 17 }) + '</a>' +
+        '<form class="lead" id="lead-form" novalidate>' +
+          '<div class="lead__fields">' +
+            '<label class="lead__field"><span>' + esc(f.nameLabel) + ' <i>— необязательно</i></span>' +
+              '<input type="text" name="name" autocomplete="name" maxlength="60" placeholder="' + esc(f.nameHint) + '"></label>' +
+            '<label class="lead__field"><span>' + esc(f.phoneLabel) + ' <i class="lead__req">*</i></span>' +
+              '<input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required>' +
+              '<em class="lead__err" data-err="phone" hidden>' + esc(f.errPhone) + '</em></label>' +
+          '</div>' +
+          '<label class="lead__check"><input type="checkbox" name="pd" required><span>' + linked(f.consentPd) + '</span></label>' +
+          '<em class="lead__err" data-err="pd" hidden>' + esc(f.errPd) + '</em>' +
+          '<label class="lead__check"><input type="checkbox" name="ads"><span>' + linked(f.consentAds) + '</span></label>' +
+          '<button type="submit" class="btn btn--cta form__submit">' + esc(f.submit) + ic('arrow', { size: 17 }) + '</button>' +
+          '<em class="lead__err" data-err="send" hidden>' + esc(f.errSend) + '</em>' +
+          '<p class="lead__or">' + esc(f.or) + '</p>' +
+          '<a class="btn lead__wa" href="' + wa + '"' + deadAttr(wa) + '>' + ic('whatsapp', { size: 18 }) + esc(f.waLabel) + '</a>' +
+        '</form>' +
+        '<div class="lead__done" id="lead-done" hidden>' +
+          '<span class="lead__tick">' + ic('check', { size: 26 }) + '</span>' +
+          '<b class="lead__done-title">' + esc(f.doneTitle) + '</b>' +
+          '<p class="lead__done-text">' + esc(f.doneText) + '</p>' +
+          '<a class="btn btn--cta lead__wa-done" id="lead-wa" href="#" target="_blank" rel="noopener">' +
+            ic('whatsapp', { size: 18 }) + esc(f.waLabel) + '</a>' +
+        '</div>' +
         '<p class="form__note">' + lede(f.note) + '</p>' +
       '</div>' +
     '</div></section>';
@@ -802,7 +829,10 @@
       '<div class="footer__bottom">' +
         '<span>© ' + new Date().getFullYear() + ' ' + esc(legal.orgName || S.brand.name) +
           (reqs.length ? ' · ' + reqs.join(' · ') : '') + ' · Карта © OpenStreetMap</span>' +
-        '<a href="' + esc(f.privacyHref || '#') + '">' + esc(f.privacyLabel) + '</a>' +
+        '<span class="footer__links">' +
+          '<a href="' + esc(f.privacyHref || '#') + '">' + esc(f.privacyLabel) + '</a>' +
+          '<button type="button" class="footer__cookie" data-cookie-settings hidden>Настройки cookie</button>' +
+        '</span>' +
       '</div>' +
     '</div></footer>';
   }
@@ -843,6 +873,8 @@
     wireCarousels();
     wireTerms();
     wireImageFade();
+    wireConsent();
+    wireLeadForm();
   }
 
   /* ---------- шапка ---------- */
@@ -1134,6 +1166,175 @@
       /* картинки грузятся лениво — пересчитать, когда размеры станут известны */
       track.querySelectorAll('img').forEach(function (img) { img.addEventListener('load', sync); });
       sync();
+    });
+  }
+
+  /* ---------- cookie и Яндекс Метрика ----------
+     Код счётчика стоит в <head> (window.arMetrika) и сам запускается у тех,
+     кто уже согласился. Здесь — уведомление с выбором и цели для Метрики:
+     whatsapp, phone — нажатия на кнопки связи, lead — отправленная заявка. */
+  function wireConsent() {
+    var id = Number(String((C.metrika && C.metrika.id) || '').replace(/\D/g, ''));
+    if (!id || typeof window.arMetrika !== 'function') return;
+    var KEY = 'ar161-cookie';
+    var get = function () { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
+    var set = function (v) { try { localStorage.setItem(KEY, v); } catch (e) {} };
+    var on = function () { return !!window.arMetrika.done; };
+    var bar = null;
+
+    function apply(analytics) {
+      set(analytics ? 'yes' : 'no');
+      bar.hidden = true;
+      if (analytics) { window.arMetrika(); return; }
+      /* отказ: стираем cookie Метрики; если она уже работала — перезагружаем без неё */
+      document.cookie.split(';').forEach(function (c) {
+        var name = c.split('=')[0].trim();
+        if (/^_ym/.test(name)) document.cookie = name + '=; Max-Age=0; path=/';
+      });
+      if (on()) location.reload();
+    }
+
+    function show(settings) {
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.className = 'cookie';
+        bar.innerHTML =
+          '<div class="cookie__main">' +
+            '<p class="cookie__text">Мы используем cookie и Яндекс Метрику, чтобы понимать, как работает сайт. ' +
+              '<a href="consent.html">Подробнее</a></p>' +
+            '<div class="cookie__actions">' +
+              '<button type="button" class="btn btn--sm btn--cta" data-act="all">Принять</button>' +
+              '<button type="button" class="btn btn--sm cookie__ghost" data-act="none">Отклонить</button>' +
+              '<button type="button" class="cookie__link" data-act="settings">Настроить</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cookie__settings">' +
+            '<p class="cookie__title">Настройки cookie</p>' +
+            '<label class="cookie__opt"><input type="checkbox" checked disabled>' +
+              '<span><b>Необходимые</b>Запоминают ваш выбор в этом окне. Всегда включены</span></label>' +
+            '<label class="cookie__opt"><input type="checkbox" data-opt="analytics">' +
+              '<span><b>Аналитика — Яндекс Метрика</b>Статистика посещений, чтобы делать сайт удобнее</span></label>' +
+            '<div class="cookie__actions">' +
+              '<button type="button" class="btn btn--sm btn--cta" data-act="save">Сохранить</button>' +
+              '<button type="button" class="btn btn--sm cookie__ghost" data-act="all">Принять все</button>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(bar);
+        bar.addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-act]');
+          if (!b) return;
+          var act = b.dataset.act;
+          if (act === 'settings') { show(true); return; }
+          if (act === 'all') apply(true);
+          else if (act === 'none') apply(false);
+          else if (act === 'save') apply(bar.querySelector('[data-opt=analytics]').checked);
+        });
+      }
+      bar.querySelector('[data-opt=analytics]').checked = get() === 'yes';
+      bar.classList.toggle('is-settings', !!settings);
+      bar.hidden = false;
+    }
+
+    document.querySelectorAll('[data-cookie-settings]').forEach(function (b) {
+      b.hidden = false;
+      b.addEventListener('click', function () { show(true); });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!on() || !window.ym || !e.target.closest) return;
+      var a = e.target.closest('a[href]');
+      if (!a) return;
+      var h = a.getAttribute('href');
+      if (/wa\.me|whatsapp/i.test(h)) window.ym(id, 'reachGoal', 'whatsapp');
+      else if (/^tel:/.test(h)) window.ym(id, 'reachGoal', 'phone');
+    });
+
+    var choice = get();
+    if (choice !== 'yes' && choice !== 'no') show(false);
+  }
+
+  /* ---------- форма заявки ----------
+     Имя — по желанию, телефон — обязательно, согласие на обработку данных —
+     обязательно, согласие на рекламу — по желанию (без него заявка уходит).
+     После отправки: галочка «Заявка принята» и кнопка WhatsApp
+     с готовым сообщением. */
+  function wireLeadForm() {
+    var form = document.getElementById('lead-form');
+    if (!form) return;
+    var f = S.form;
+    var done = document.getElementById('lead-done');
+    var phone = form.elements.phone;
+    var err = function (k, on) { form.querySelector('[data-err=' + k + ']').hidden = !on; };
+
+    /* номер оформляется по ходу ввода: +7 (900) 123-45-67 */
+    var digits = function (v) {
+      var d = String(v).replace(/\D/g, '');
+      if (d[0] === '8') d = '7' + d.slice(1);
+      if (d && d[0] !== '7') d = '7' + d;
+      return d.slice(0, 11);
+    };
+    phone.addEventListener('input', function () {
+      var d = digits(phone.value);
+      var p = d ? '+7' : '';
+      if (d.length > 1) p += ' (' + d.slice(1, 4);
+      if (d.length > 4) p += ') ' + d.slice(4, 7);
+      if (d.length > 7) p += '-' + d.slice(7, 9);
+      if (d.length > 9) p += '-' + d.slice(9, 11);
+      phone.value = p;
+      err('phone', false);
+    });
+    form.elements.pd.addEventListener('change', function () { err('pd', false); });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var d = digits(phone.value);
+      var okPhone = d.length === 11;
+      var okPd = form.elements.pd.checked;
+      err('phone', !okPhone);
+      err('pd', !okPd);
+      err('send', false);
+      if (!okPhone) { phone.focus(); return; }
+      if (!okPd) return;
+
+      var name = form.elements.name.value.trim();
+      var lead = {
+        name: name,
+        phone: '+' + d,
+        pdConsent: true,
+        adsConsent: form.elements.ads.checked,
+        page: location.href,
+        time: new Date().toISOString(),
+      };
+      var btn = form.querySelector('button[type=submit]');
+      btn.disabled = true;
+
+      var finish = function () {
+        var text = f.doneWa + (name ? ' Меня зовут ' + name + '.' : '');
+        document.getElementById('lead-wa').href = waLink(text);
+        form.hidden = true;
+        done.hidden = false;
+        if (window.arMetrika && window.arMetrika.done && window.ym) {
+          window.ym(Number(C.metrika.id), 'reachGoal', 'lead');
+        }
+      };
+
+      var url = C.leads && C.leads.endpoint;
+      if (!url) {
+        console.warn('[leads] Не задан адрес для заявок (config.js → leads.endpoint) — заявка не сохранена.');
+        finish();
+        return;
+      }
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead),
+      }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        finish();
+      }).catch(function () {
+        err('send', true);
+        btn.disabled = false;
+      });
     });
   }
 
