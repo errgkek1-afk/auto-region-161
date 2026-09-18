@@ -1306,6 +1306,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 .lead__check a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .lead__err { font-size: var(--fs-xs); font-style: normal; color: #ff8a82; text-align: center; }
 .lead__err[hidden] { display: none; }
+.lead__trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
 /* кнопка: тусклая, пока нет номера; яркая, как только номер введён —
    и на компьютере, и на телефоне, без наведения мыши */

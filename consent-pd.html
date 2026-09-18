@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Яндекс Метрика, счётчик 112780919. Код Яндекса без изменений, но запускается
-       только у тех, кто нажал «Принять» в уведомлении о cookie (152-ФЗ).
-       Новым посетителям его включает app.js сразу после согласия. -->
+  <!-- Яндекс Метрика, счётчик 112780919. Код Яндекса без изменений.
+       Работает сразу; не запускается только у тех, кто нажал «Отклонить»
+       в уведомлении о cookie (выбор хранится в браузере). -->
   <script>
     window.arMetrika = function () {
       if (window.arMetrika.done) return;
@@ -18,7 +18,7 @@
       })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=112780919', 'ym');
       ym(112780919, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
     };
-    try { if (localStorage.getItem('ar161-cookie') === 'yes') window.arMetrika(); } catch (e) {}
+    try { if (localStorage.getItem('ar161-cookie') !== 'no') window.arMetrika(); } catch (e) { window.arMetrika(); }
   </script>
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0b0708">
@@ -28,9 +28,9 @@
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preload" href="fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="fonts.css?v=1789602500">
-  <link rel="stylesheet" href="theme.css?v=1789602500">
-  <link rel="stylesheet" href="base.css?v=1789602500">
+  <link rel="stylesheet" href="fonts.css?v=1789602600">
+  <link rel="stylesheet" href="theme.css?v=1789602600">
+  <link rel="stylesheet" href="base.css?v=1789602600">
   <style>
     /* Страница-документ: только текст, без блоков лендинга */
     .doc-header { border-bottom: 1px solid var(--line); }

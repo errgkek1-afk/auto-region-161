@@ -756,6 +756,8 @@
       '<em class="lead__err" data-err="phone" hidden>' + esc(f.errPhone) + '</em>' +
       '<label class="lead__check"><input type="checkbox" name="pd" required><span>' + linked(f.consentPd) + '</span></label>' +
       '<em class="lead__err" data-err="pd" hidden>' + esc(f.errPd) + '</em>' +
+      /* ловушка для ботов: человек это поле не видит и не заполняет */
+      '<input class="lead__trap" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">' +
       '<label class="lead__check"><input type="checkbox" name="ads"><span>' + linked(f.consentAds) + '</span></label>' +
       '<div class="lead__action">' +
         '<button type="submit" class="btn lead__submit">' +
@@ -1183,8 +1185,9 @@
   }
 
   /* ---------- cookie и Яндекс Метрика ----------
-     Код счётчика стоит в <head> (window.arMetrika) и сам запускается у тех,
-     кто уже согласился. Здесь — уведомление с выбором и цели для Метрики:
+     Код счётчика стоит в <head> (window.arMetrika) и работает сразу —
+     кроме тех, кто нажал «Отклонить». Здесь — уведомление с выбором
+     («Понятно» / «Отклонить» / «Настроить») и цели для Метрики:
      whatsapp, phone — нажатия на кнопки связи, lead — отправленная заявка. */
   function wireConsent() {
     var id = Number(String((C.metrika && C.metrika.id) || '').replace(/\D/g, ''));
@@ -1213,10 +1216,10 @@
         bar.className = 'cookie';
         bar.innerHTML =
           '<div class="cookie__main">' +
-            '<p class="cookie__text">Мы используем cookie и Яндекс Метрику, чтобы понимать, как работает сайт. ' +
-              '<a href="consent.html">Подробнее</a></p>' +
+            '<p class="cookie__text">Продолжая пользоваться сайтом, вы соглашаетесь на использование cookie ' +
+              'и Яндекс Метрики. <a href="consent.html">Подробнее</a></p>' +
             '<div class="cookie__actions">' +
-              '<button type="button" class="btn btn--sm btn--cta" data-act="all">Принять</button>' +
+              '<button type="button" class="btn btn--sm btn--cta" data-act="all">Понятно</button>' +
               '<button type="button" class="btn btn--sm cookie__ghost" data-act="none">Отклонить</button>' +
               '<button type="button" class="cookie__link" data-act="settings">Настроить</button>' +
             '</div>' +
@@ -1243,7 +1246,7 @@
           else if (act === 'save') apply(bar.querySelector('[data-opt=analytics]').checked);
         });
       }
-      bar.querySelector('[data-opt=analytics]').checked = get() === 'yes';
+      bar.querySelector('[data-opt=analytics]').checked = get() !== 'no';
       bar.classList.toggle('is-settings', !!settings);
       bar.hidden = false;
     }
@@ -1368,6 +1371,7 @@
           phone: '+' + digits(phone.value),
           pdConsent: true,
           adsConsent: form.elements.ads.checked,
+          company: form.elements.company.value,
           source: source,
           note: note,
           page: location.href,
@@ -1396,9 +1400,10 @@
           finish();
           return;
         }
+        /* text/plain — «простой» запрос: браузер не шлёт лишнюю предварительную проверку */
         fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
           body: JSON.stringify(lead),
         }).then(function (r) {
           if (!r.ok) throw new Error(r.status);
