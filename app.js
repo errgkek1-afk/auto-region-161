@@ -765,7 +765,6 @@
       '</div>' +
       '<em class="lead__err" data-err="send" hidden>' + esc(f.errSend) + '</em>' +
       '<div class="lead__after" hidden>' +
-        '<p class="lead__done">' + esc(f.doneText) + '</p>' +
         '<a class="btn lead__wa" data-lead-wa href="#" target="_blank" rel="noopener">' +
           ic('whatsapp', { size: 18 }) + esc(f.waLabel) + '</a>' +
       '</div>' +
@@ -1290,6 +1289,21 @@
         if (first && !first.closest('.lead').classList.contains('is-sent')) first.focus();
       }
     }
+    /* окно в режиме «Спасибо, заявка отправлена» */
+    var modalForm = modal.querySelector('[data-lead-form]');
+    function setThanks() {
+      modal.querySelector('.modal__title').textContent = f.thanksTitle;
+      modal.querySelector('.modal__sub').textContent = f.thanksSub;
+    }
+    /* заявку отправили из формы внизу — благодарность тоже во всплывающем окне */
+    function showThanks(href) {
+      modalForm.querySelector('[data-lead-wa]').href = href;
+      modalForm.classList.add('is-sent');
+      modalForm.querySelector('.lead__submit').disabled = true;
+      modalForm.querySelector('.lead__after').hidden = false;
+      setThanks();
+      openModal('', '');
+    }
     function closeModal() {
       modal.classList.remove('is-open');
       document.documentElement.classList.remove('is-modal');
@@ -1363,10 +1377,14 @@
 
         var finish = function () {
           var text = f.doneWa + (name ? ' Меня зовут ' + name + '.' : '') + (note ? ' ' + note : '');
-          form.querySelector('[data-lead-wa]').href = waLink(text);
+          var href = waLink(text);
+          form.querySelector('[data-lead-wa]').href = href;
           form.classList.add('is-sent');
-          setTimeout(function () { form.querySelector('.lead__after').hidden = false; },
-                     PREFERS_STILL.matches ? 0 : 380);
+          /* кнопка сворачивается в галочку, потом — «Спасибо» и WhatsApp */
+          setTimeout(function () {
+            form.querySelector('.lead__after').hidden = false;
+            if (inModal) setThanks(); else showThanks(href);
+          }, PREFERS_STILL.matches ? 0 : 380);
           if (window.arMetrika && window.arMetrika.done && window.ym) {
             window.ym(Number(C.metrika.id), 'reachGoal', 'lead');
           }

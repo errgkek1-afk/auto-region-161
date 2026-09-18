@@ -90,7 +90,8 @@ def rendered_app():
     with http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler) as srv:
         port = srv.server_address[1]
         threading.Thread(target=srv.serve_forever, daemon=True).start()
-        with tempfile.TemporaryDirectory() as profile:
+        # ignore_cleanup_errors: Chrome иногда ещё дописывает профиль, когда папку уже удаляем
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as profile:
             dom = dump_dom('http://127.0.0.1:%d/index.html?prerender' % port, profile)
         srv.shutdown()
     m = re.search(r'<div id="app">(.*?)</div>\s*<script src="config\.js', dom, re.S)
