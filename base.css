@@ -12,6 +12,9 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-h) + 12px);
+  /* место под полосу прокрутки держим всегда: когда окно заявки запрещает
+     прокрутку, ширина страницы не меняется и текст не перескакивает */
+  scrollbar-gutter: stable;
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 

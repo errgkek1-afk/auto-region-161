@@ -558,6 +558,27 @@
   }
 
   /* =====================  БЛОК 6 — Мастера  ===================== */
+  /* =====================  Лента фото «как док»  ===================== */
+  function renderGallery() {
+    var g = S.gallery;
+    if (!g || !g.items || !g.items.length) return '';
+    var items = g.items.map(function (x, i) {
+      var n = i + 1;
+      return '<div class="dock__item">' +
+        '<figure class="dock__card">' +
+          (x.photo
+            ? pic(x.photo, x.alt || ('Фото ' + n), x.w, x.h)
+            : '<div class="photo-stub"><span class="photo-stub__tag">Фото ' + n + '</span></div>') +
+        '</figure>' +
+      '</div>';
+    }).join('');
+    return '<section class="gallery" id="gallery"><div class="wrap">' +
+      (g.title ? '<h2 class="gallery__title">' + accent(g.title) + '</h2>' : '') +
+    '</div>' +
+    '<div class="dock" data-dock>' + items + '</div>' +
+    '</section>';
+  }
+
   function renderTeam() {
     var t = S.team;
 
@@ -830,7 +851,7 @@
         '<div class="footer__col">' +
           '<b>Контакты</b>' +
           (ph ? '<a href="tel:+' + esc(C.contacts.phone) + '">' + esc(ph) + '</a>' : '<span>Телефон — уточняется</span>') +
-          '<a href="' + waLink() + '"' + deadAttr(waLink()) + '>Написать в WhatsApp</a>' +
+          '<a href="#zapis" data-lead="подвал: WhatsApp">Написать в WhatsApp</a>' +
         '</div>' +
 
         '<div class="footer__col">' +
@@ -852,9 +873,9 @@
   }
 
   /* =====================  ПЛАВАЮЩАЯ КНОПКА WA (моб.)  ===================== */
+  /* Как и все кнопки записи, открывает окно заявки; WhatsApp — после отправки. */
   function renderWaFloat() {
-    var wa = waLink();
-    return '<a class="wa-float" href="' + wa + '"' + deadAttr(wa) + ' aria-label="Написать в WhatsApp">' +
+    return '<a class="wa-float" href="#zapis" data-lead="кнопка WhatsApp" aria-label="Написать в WhatsApp">' +
       ic('whatsapp', { size: 26 }) + '</a>';
   }
 
@@ -866,7 +887,7 @@
 
     document.getElementById('app').innerHTML =
       renderHeader() +
-      '<main>' + renderHero() + renderClients() + renderTuning() + renderCompare() + renderCalc() + renderTeam() + renderReviews() + renderFaq() + renderLocation() + renderForm() + '</main>' +
+      '<main>' + renderHero() + renderClients() + renderTuning() + renderCompare() + renderCalc() + renderGallery() + renderTeam() + renderReviews() + renderFaq() + renderLocation() + renderForm() + '</main>' +
       renderFooter() +
       renderLeadModal() +
       renderWaFloat();
@@ -886,6 +907,7 @@
     wireCalc();
     wireAccordions();
     wireCarousels();
+    wireDock();
     wireTerms();
     wireImageFade();
     wireConsent();
@@ -1023,7 +1045,7 @@
     document.getElementById('tuning-prev').addEventListener('click', function () { byUser(idx - 1); });
     document.getElementById('tuning-next').addEventListener('click', function () { byUser(idx + 1); });
 
-    /* ссылка «От 72 часов — и вот почему» ведёт сразу на нужный подблок */
+    /* ссылка «От 48 часов — на китайца» с первого экрана ведёт сразу на нужный подблок */
     function fromHash() {
       var m = /^#tuning-(.+)$/.exec(location.hash);
       if (!m) return;
@@ -1154,6 +1176,83 @@
 
   /* Ленты фото (блок 9 и блок 8): стрелки листают на одну плитку,
      прячутся у краёв и когда листать нечего. Свайп работает и без JS. */
+  /* Лента «как док»: карточка в центре яркая и приподнята, соседние
+     тусклее. Палец и колесо — обычная прокрутка с притягиванием;
+     мышью ленту можно тянуть, после броска она доводится до ближайшей
+     карточки; клик по боковой карточке везёт её в центр. */
+  function wireDock() {
+    document.querySelectorAll('[data-dock]').forEach(function (el) {
+      var items = [].slice.call(el.children);
+      var active = -1, s = null, suppressClick = false, settleTimer = 0;
+      var smooth = function () { return PREFERS_STILL.matches ? 'auto' : 'smooth'; };
+
+      function centerOf(i) { var ch = items[i]; return ch.offsetLeft + ch.offsetWidth / 2 - el.clientWidth / 2; }
+      function nearest(pos) {
+        var best = 0, bd = Infinity;
+        items.forEach(function (_, i) { var d = Math.abs(centerOf(i) - pos); if (d < bd) { bd = d; best = i; } });
+        return best;
+      }
+      function mark() {
+        var i = nearest(el.scrollLeft);
+        if (i === active) return;
+        if (items[active]) items[active].classList.remove('is-active');
+        items[i].classList.add('is-active');
+        active = i;
+      }
+      function goTo(i) { el.scrollTo({ left: centerOf(i), behavior: smooth() }); }
+
+      el.addEventListener('scroll', mark, { passive: true });
+      window.addEventListener('resize', function () { if (active > -1) el.scrollLeft = centerOf(active); });
+
+      el.addEventListener('click', function (e) {
+        if (suppressClick) { e.preventDefault(); e.stopPropagation(); return; }
+        var it = e.target.closest('.dock__item');
+        if (it) { var i = items.indexOf(it); if (i !== active) goTo(i); }
+      }, true);
+      el.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+      /* перетаскивание мышью (палец и так листает) */
+      function onMove(e) {
+        if (!s || e.pointerId !== s.id) return;
+        var dx = e.clientX - s.x;
+        if (!s.moved) { if (Math.abs(dx) < 3) return; s.moved = true; el.classList.add('is-dragging'); }
+        e.preventDefault();
+        var now = performance.now(), dt = now - s.lt;
+        if (dt > 0) s.v = 0.7 * ((e.clientX - s.lx) / dt) + 0.3 * s.v;
+        s.lx = e.clientX; s.lt = now;
+        el.scrollLeft = s.left - dx;
+      }
+      function onUp(e) {
+        if (!s || e.pointerId !== s.id) return;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        var st = s; s = null;
+        if (!st.moved) { el.classList.remove('is-dragging'); return; }
+        suppressClick = true;
+        setTimeout(function () { suppressClick = false; }, 80);
+        if (performance.now() - st.lt > 100) st.v = 0;
+        goTo(nearest(el.scrollLeft - st.v * 180));
+        clearTimeout(settleTimer);
+        /* притягивание включаем обратно только после доводки, иначе лента дёргается */
+        settleTimer = setTimeout(function () { el.classList.remove('is-dragging'); }, 450);
+      }
+      el.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        clearTimeout(settleTimer);
+        el.classList.add('is-dragging');
+        s = { id: e.pointerId, x: e.clientX, left: el.scrollLeft, lx: e.clientX, lt: performance.now(), v: 0, moved: false };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
+      });
+
+      /* старт — со второй карточки, чтобы слева было видно, что лента листается */
+      el.scrollLeft = centerOf(Math.min(1, items.length - 1));
+      mark();
+    });
+  }
+
   function wireCarousels() {
     document.querySelectorAll('[data-strip]').forEach(function (strip) {
       var track = strip.querySelector('.strip__track');
