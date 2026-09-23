@@ -933,7 +933,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
   aspect-ratio: 9 / 16;        /* запасное значение; настоящее ставится по кадру */
   border-radius: var(--radius);
   overflow: hidden;
-  background: #0b0607;
+  background: #0b0607 center / cover no-repeat;
   opacity: .45;
   transform: scale(.88);
   transition: opacity .22s ease-out, transform .22s ease-out;
@@ -942,6 +942,9 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 /* contain, а не cover: кадр показываем целиком, ничего не срезаем */
 .dock__card img,
 .dock__card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* пока ролик не пошёл — видно обложку под ним */
+.dock__card video { opacity: 0; transition: opacity .2s ease-out; }
+.dock__item.is-playing .dock__card video { opacity: 1; }
 .dock__card picture { display: block; width: 100%; height: 100%; }
 .dock__card .photo-stub { padding: 12px; }
 

@@ -569,7 +569,7 @@
         /* muted + playsinline — иначе телефон не даст ролику стартовать сам;
            preload="metadata" держит вес страницы маленьким до долистывания */
         inner = '<video class="dock__video" muted loop playsinline preload="metadata" ' +
-            'poster="' + esc(x.poster || '') + '" aria-label="' + esc(x.alt || 'Ролик сервиса') + '">' +
+            'aria-label="' + esc(x.alt || 'Ролик сервиса') + '">' +
             '<source src="' + esc(x.video) + '" type="video/mp4">' +
           '</video>' +
           '<button class="dock__sound" type="button" data-dock-sound aria-label="Включить звук">' +
@@ -583,7 +583,11 @@
       }
       /* пропорция карточки = пропорция самого кадра: высота у всех одна,
          ширина своя — ничего не обрезаем и не растягиваем */
-      var ratio = (x.w && x.h) ? (' style="aspect-ratio:' + x.w + '/' + x.h + '"') : '';
+      var style = (x.w && x.h) ? ('aspect-ratio:' + x.w + '/' + x.h + ';') : '';
+      /* обложка — фоном карточки: первый кадр ролика бывает тёмным, и без этого
+         до запуска карточка выглядела чёрной */
+      if (x.poster) style += "background-image:url('" + esc(x.poster) + "');";
+      var ratio = style ? (' style="' + style + '"') : '';
       return '<div class="dock__item' + (x.video ? ' dock__item--video' : '') + '">' +
         '<figure class="dock__card"' + ratio + '>' + inner + '</figure>' +
       '</div>';
@@ -1226,7 +1230,7 @@
         items.forEach(function (it, i) {
           var v = it.querySelector('video');
           if (!v) return;
-          if (i === active && inView && !PREFERS_STILL.matches) {
+          if (i === active && inView && !document.hidden && !PREFERS_STILL.matches) {
             v.muted = !wantSound;
             var p = v.play();
             if (p && p.then) {
@@ -1251,6 +1255,22 @@
           }
         });
       }
+      /* вкладку свернули, закрыли или ушли на другую — ролики замолкают
+         и встают на паузу, иначе звук продолжает идти «из ниоткуда» */
+      function stopAll() {
+        items.forEach(function (it) {
+          var v = it.querySelector('video');
+          if (!v) return;
+          v.pause();
+          it.classList.remove('is-playing');
+        });
+      }
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stopAll(); else playCenter();
+      });
+      window.addEventListener('pagehide', stopAll);
+      window.addEventListener('blur', function () { if (document.hidden) stopAll(); });
+
       /* первое касание страницы — разрешение на звук */
       ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
         document.addEventListener(ev, function once() {
@@ -1265,8 +1285,12 @@
         var v = it.querySelector('video');
         var b = it.querySelector('[data-dock-sound]');
         if (!v || !b) return;
-        b.classList.toggle('is-on', !v.muted);
-        b.setAttribute('aria-label', v.muted ? 'Включить звук' : 'Выключить звук');
+        var on = !v.muted;
+        b.classList.toggle('is-on', on);
+        /* значок показывает текущее состояние: динамик с волнами — звук идёт,
+           перечёркнутый — выключен */
+        b.innerHTML = ic(on ? 'sound' : 'mute', { size: 20 });
+        b.setAttribute('aria-label', on ? 'Выключить звук' : 'Включить звук');
       }
       if (window.IntersectionObserver) {
         new IntersectionObserver(function (entries) {
