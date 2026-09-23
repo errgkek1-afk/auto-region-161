@@ -908,7 +908,8 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
   text-wrap: balance;
 }
 .dock {
-  --dock-w: 240px;
+  --dock-w: 240px;             /* ширина «окна» по центру, под неё считаются поля */
+  --dock-h: 420px;             /* высота карточек одна на всю ленту */
   display: flex;
   gap: 28px;
   margin-top: clamp(12px, 2vw, 20px);
@@ -925,10 +926,11 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 .dock.is-dragging { scroll-snap-type: none; cursor: grabbing; }
 .dock.is-dragging * { pointer-events: none; }
 @media (hover: none) { .dock { scroll-snap-type: x mandatory; } }
-.dock__item { flex: 0 0 var(--dock-w); scroll-snap-align: center; cursor: pointer; }
+.dock__item { flex: 0 0 auto; scroll-snap-align: center; cursor: pointer; }
 .dock__card {
   position: relative;
-  aspect-ratio: 9 / 16;        /* и ролики, и фото сняты вертикально */
+  height: var(--dock-h);
+  aspect-ratio: 9 / 16;        /* запасное значение; настоящее ставится по кадру */
   border-radius: var(--radius);
   overflow: hidden;
   background: #0b0607;
@@ -939,7 +941,8 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 .dock__item.is-active .dock__card { opacity: 1; transform: translateY(-12px) scale(1); }
 /* contain, а не cover: кадр показываем целиком, ничего не срезаем */
 .dock__card img,
-.dock__card video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.dock__card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dock__card picture { display: block; width: 100%; height: 100%; }
 .dock__card .photo-stub { padding: 12px; }
 
 /* значок «play» — виден, пока ролик стоит */
@@ -968,7 +971,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 }
 .dock__sound.is-on { border-color: var(--accent-hot); background: rgba(255,42,32,.3); }
 .dock__item:not(.is-active) .dock__sound { opacity: 0; pointer-events: none; }
-@media (max-width: 600px) { .dock { --dock-w: 200px; gap: 14px; } }
+@media (max-width: 600px) { .dock { --dock-w: 200px; --dock-h: 340px; gap: 14px; } }
 @media (prefers-reduced-motion: reduce) { .dock__card { transition: none; } }
 
 .team { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }

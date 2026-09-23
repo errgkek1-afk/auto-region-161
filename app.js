@@ -581,8 +581,11 @@
         stub += 1;
         inner = '<div class="photo-stub"><span class="photo-stub__tag">Фото ' + stub + '</span></div>';
       }
+      /* пропорция карточки = пропорция самого кадра: высота у всех одна,
+         ширина своя — ничего не обрезаем и не растягиваем */
+      var ratio = (x.w && x.h) ? (' style="aspect-ratio:' + x.w + '/' + x.h + '"') : '';
       return '<div class="dock__item' + (x.video ? ' dock__item--video' : '') + '">' +
-        '<figure class="dock__card">' + inner + '</figure>' +
+        '<figure class="dock__card"' + ratio + '>' + inner + '</figure>' +
       '</div>';
     }).join('');
     return '<section class="gallery" id="gallery"><div class="wrap">' +
@@ -1214,17 +1217,33 @@
         playCenter();
       }
 
-      /* Центральный ролик играет сам, остальные стоят. Со звуком браузеры
-         запускать не дают, поэтому тихо; звук — по значку на карточке. */
-      var inView = false;
+      /* Центральный ролик играет сам. Звук хотим сразу, но браузеры запускают
+         видео со звуком только после того, как человек хоть раз коснулся
+         страницы, — поэтому сначала пробуем со звуком, при отказе играем тихо
+         и включаем звук на первом же касании. */
+      var inView = false, wantSound = true;
       function playCenter() {
         items.forEach(function (it, i) {
           var v = it.querySelector('video');
           if (!v) return;
           if (i === active && inView && !PREFERS_STILL.matches) {
+            v.muted = !wantSound;
             var p = v.play();
-            if (p && p.then) p.then(function () { it.classList.add('is-playing'); }, function () {});
-            else it.classList.add('is-playing');
+            if (p && p.then) {
+              p.then(function () {
+                it.classList.add('is-playing');
+                syncSound(it);
+              }, function () {
+                /* со звуком не дали — играем тихо и ждём касания */
+                v.muted = true;
+                syncSound(it);
+                var p2 = v.play();
+                if (p2 && p2.catch) p2.catch(function () {});
+                it.classList.add('is-playing');
+              });
+            } else {
+              it.classList.add('is-playing');
+            }
           } else {
             v.pause();
             it.classList.remove('is-playing');
@@ -1232,6 +1251,16 @@
           }
         });
       }
+      /* первое касание страницы — разрешение на звук */
+      ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+        document.addEventListener(ev, function once() {
+          document.removeEventListener(ev, once);
+          if (!wantSound) return;
+          var it = items[active];
+          var v = it && it.querySelector('video');
+          if (v && !v.paused) { v.muted = false; syncSound(it); }
+        }, { passive: true });
+      });
       function syncSound(it) {
         var v = it.querySelector('video');
         var b = it.querySelector('[data-dock-sound]');
@@ -1254,7 +1283,11 @@
            так же, как в лентах рилсов */
         if (!b) {
           var card = e.target.closest('.dock__item--video');
-          if (!card || !card.classList.contains('is-active')) return;
+          if (!card) return;
+          if (!card.classList.contains('is-active')) {   /* боковую сначала в центр */
+            goTo(items.indexOf(card));
+            return;
+          }
           b = card.querySelector('[data-dock-sound]');
           if (!b) return;
         }
@@ -1264,7 +1297,8 @@
         var v = it.querySelector('video');
         /* звук — только у одного ролика сразу */
         items.forEach(function (o) { var ov = o.querySelector('video'); if (ov && ov !== v) { ov.muted = true; syncSound(o); } });
-        v.muted = !v.muted;
+        wantSound = v.muted;              /* был тихим — значит человек хочет звук */
+        v.muted = !wantSound;
         syncSound(it);
         if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
       });
@@ -1297,7 +1331,7 @@
         window.removeEventListener('pointerup', onUp);
         window.removeEventListener('pointercancel', onUp);
         var st = s; s = null;
-        if (!st.moved) { el.classList.remove('is-dragging'); return; }
+        if (!st.moved) { el.classList.remove('is-dragging'); return; }   /* простой клик — ничего не делаем */
         suppressClick = true;
         setTimeout(function () { suppressClick = false; }, 80);
         if (performance.now() - st.lt > 100) st.v = 0;
@@ -1309,7 +1343,9 @@
       el.addEventListener('pointerdown', function (e) {
         if (e.pointerType !== 'mouse' || e.button !== 0) return;
         clearTimeout(settleTimer);
-        el.classList.add('is-dragging');
+        /* класс is-dragging вешаем только когда ленту реально потянули (в onMove):
+           он снимает pointer-events у карточек, и при простом клике кнопка звука
+           переставала нажиматься */
         s = { id: e.pointerId, x: e.clientX, left: el.scrollLeft, lx: e.clientX, lt: performance.now(), v: 0, moved: false };
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
