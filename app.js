@@ -1248,8 +1248,16 @@
         inView = true;
       }
       el.addEventListener('click', function (e) {
-        var b = e.target.closest ? e.target.closest('[data-dock-sound]') : null;
-        if (!b) return;
+        if (!e.target.closest) return;
+        var b = e.target.closest('[data-dock-sound]');
+        /* по центральному ролику звук включается и простым нажатием на кадр —
+           так же, как в лентах рилсов */
+        if (!b) {
+          var card = e.target.closest('.dock__item--video');
+          if (!card || !card.classList.contains('is-active')) return;
+          b = card.querySelector('[data-dock-sound]');
+          if (!b) return;
+        }
         e.preventDefault();
         e.stopPropagation();
         var it = b.closest('.dock__item');
