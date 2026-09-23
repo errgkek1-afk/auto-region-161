@@ -562,14 +562,27 @@
   function renderGallery() {
     var g = S.gallery;
     if (!g || !g.items || !g.items.length) return '';
+    var stub = 0;
     var items = g.items.map(function (x, i) {
-      var n = i + 1;
-      return '<div class="dock__item">' +
-        '<figure class="dock__card">' +
-          (x.photo
-            ? pic(x.photo, x.alt || ('Фото ' + n), x.w, x.h)
-            : '<div class="photo-stub"><span class="photo-stub__tag">Фото ' + n + '</span></div>') +
-        '</figure>' +
+      var inner;
+      if (x.video) {
+        /* muted + playsinline — иначе телефон не даст ролику стартовать сам;
+           preload="metadata" держит вес страницы маленьким до долистывания */
+        inner = '<video class="dock__video" muted loop playsinline preload="metadata" ' +
+            'poster="' + esc(x.poster || '') + '" aria-label="' + esc(x.alt || 'Ролик сервиса') + '">' +
+            '<source src="' + esc(x.video) + '" type="video/mp4">' +
+          '</video>' +
+          '<button class="dock__sound" type="button" data-dock-sound aria-label="Включить звук">' +
+            ic('mute', { size: 18 }) + '</button>' +
+          '<span class="dock__play" aria-hidden="true">' + ic('play', { size: 26 }) + '</span>';
+      } else if (x.photo) {
+        inner = pic(x.photo, x.alt || 'Работа сервиса', x.w, x.h);
+      } else {
+        stub += 1;
+        inner = '<div class="photo-stub"><span class="photo-stub__tag">Фото ' + stub + '</span></div>';
+      }
+      return '<div class="dock__item' + (x.video ? ' dock__item--video' : '') + '">' +
+        '<figure class="dock__card">' + inner + '</figure>' +
       '</div>';
     }).join('');
     return '<section class="gallery" id="gallery"><div class="wrap">' +
@@ -1198,7 +1211,55 @@
         if (items[active]) items[active].classList.remove('is-active');
         items[i].classList.add('is-active');
         active = i;
+        playCenter();
       }
+
+      /* Центральный ролик играет сам, остальные стоят. Со звуком браузеры
+         запускать не дают, поэтому тихо; звук — по значку на карточке. */
+      var inView = false;
+      function playCenter() {
+        items.forEach(function (it, i) {
+          var v = it.querySelector('video');
+          if (!v) return;
+          if (i === active && inView && !PREFERS_STILL.matches) {
+            var p = v.play();
+            if (p && p.then) p.then(function () { it.classList.add('is-playing'); }, function () {});
+            else it.classList.add('is-playing');
+          } else {
+            v.pause();
+            it.classList.remove('is-playing');
+            if (i !== active) { v.muted = true; syncSound(it); }
+          }
+        });
+      }
+      function syncSound(it) {
+        var v = it.querySelector('video');
+        var b = it.querySelector('[data-dock-sound]');
+        if (!v || !b) return;
+        b.classList.toggle('is-on', !v.muted);
+        b.setAttribute('aria-label', v.muted ? 'Включить звук' : 'Выключить звук');
+      }
+      if (window.IntersectionObserver) {
+        new IntersectionObserver(function (entries) {
+          inView = entries[0].isIntersecting;
+          playCenter();
+        }, { threshold: 0.35 }).observe(el);
+      } else {
+        inView = true;
+      }
+      el.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('[data-dock-sound]') : null;
+        if (!b) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var it = b.closest('.dock__item');
+        var v = it.querySelector('video');
+        /* звук — только у одного ролика сразу */
+        items.forEach(function (o) { var ov = o.querySelector('video'); if (ov && ov !== v) { ov.muted = true; syncSound(o); } });
+        v.muted = !v.muted;
+        syncSound(it);
+        if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      });
       function goTo(i) { el.scrollTo({ left: centerOf(i), behavior: smooth() }); }
 
       el.addEventListener('scroll', mark, { passive: true });
@@ -1247,8 +1308,8 @@
         window.addEventListener('pointercancel', onUp);
       });
 
-      /* старт — со второй карточки, чтобы слева было видно, что лента листается */
-      el.scrollLeft = centerOf(Math.min(1, items.length - 1));
+      /* старт — с первой карточки: первым человек видит ролик №1 */
+      el.scrollLeft = centerOf(0);
       mark();
     });
   }
