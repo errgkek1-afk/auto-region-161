@@ -1,0 +1,1590 @@
+/* =====================================================================
+   БЛОКИ. Растёт по мере согласования блоков ТЗ.
+   ===================================================================== */
+
+/* =====================================================================
+   БЛОК 1 — Первый экран.
+   Два слоя: сцена (кирпичная стена гаража) и контент.
+   Света нет — только кладка и затемнение по краям.
+   ===================================================================== */
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 620px;
+  margin-top: calc(-1 * var(--header-h));            /* сцена уходит под шапку */
+  padding-block: calc(var(--header-h) + 32px) 56px;
+}
+@media (min-width: 1024px) {
+  .hero { min-height: 90vh; padding-block: calc(var(--header-h) + 24px) 48px; }
+}
+
+/* ---------- сцена: кирпичная стена ----------
+   Кладка — один тайл-SVG в data-URI: браузер размножает его сам,
+   это один слой вместо четырёх градиентов с масками. */
+.hero__scene { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+.scene__wall {
+  position: absolute;
+  inset: 0;
+  background-color: var(--brick-deep);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='48'%3E%3Cg fill='%23000' fill-opacity='0.42'%3E%3Crect width='100' height='2'/%3E%3Crect y='24' width='100' height='2'/%3E%3Crect width='2' height='24'/%3E%3Crect x='50' width='2' height='24'/%3E%3Crect x='25' y='24' width='2' height='24'/%3E%3Crect x='75' y='24' width='2' height='24'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(120% 90% at 50% 34%, var(--brick) 0%, #3d110e 46%, var(--brick-deep) 100%);
+}
+
+/* затемнение по краям — чтобы белый текст читался */
+.scene__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(8,4,5,.96) 0%, rgba(8,4,5,.88) 26%, rgba(8,4,5,.55) 44%, rgba(8,4,5,.3) 60%, rgba(8,4,5,.62) 86%, rgba(8,4,5,.95) 100%),
+    linear-gradient(180deg, rgba(8,4,5,.88) 0%, rgba(8,4,5,.2) 18%, rgba(8,4,5,.28) 72%, rgba(8,4,5,.96) 100%);
+}
+
+/* ---------- контент: две симметричные колонки ---------- */
+.hero__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: grid;
+  gap: 40px;
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  .hero__inner { grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 88px); }
+}
+
+/* ---------- левая колонка ---------- */
+.hero__title { font-size: var(--fs-display); letter-spacing: -0.038em; text-wrap: balance; }
+/* Самые узкие телефоны (320 px): строки, которые обычно стоят в одну
+   линию, здесь переносятся — иначе страница уезжала вбок. От 360 px всё как было. */
+@media (max-width: 350px) {
+  .hero__title { font-size: 2rem; }
+  .hero__engines, .hero__counter span { white-space: normal; }
+  .hero__engines { font-size: .8rem; }
+  .hero__counter { flex-wrap: wrap; justify-content: center; }
+  .hero__inner > * { min-width: 0; }
+  .calc__out { grid-template-columns: minmax(0, 1fr); }
+  .calc__go { white-space: normal; }
+}
+.hero__engines {
+  display: block;
+  margin-top: 16px;
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+}
+
+/* Телефон: всё по центру, кроме списка хуков — он остаётся слева,
+   иначе строки с иконками разъезжаются и читать неудобно. */
+@media (max-width: 1023px) {
+  .hero__title,
+  .hero__engines,
+  .hero__term,
+  .hero__caption-title,
+  .hero__caption-sub { text-align: center; }
+  .hero__engines {
+    white-space: nowrap;
+    font-size: clamp(0.66rem, 3.05vw, 1.05rem);
+  }
+  /* кнопка и счётчик — по центру и на одном уровне */
+  .hero__actions { justify-content: center; }
+  .hero__counter { justify-content: center; }
+}
+
+/* плашка срока — переключается «роликом» */
+.hero__term {
+  margin-top: 22px;
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  color: #ff5b52;
+}
+.hero__term a { color: inherit; border-bottom: 1px solid rgba(255, 91, 82, .42); }
+.hero__term a:hover { border-bottom-color: #ff5b52; }
+
+/* мини-хуки */
+.hero__hooks { display: grid; gap: 13px; margin-top: 30px; }
+.hero__hook { display: flex; gap: 11px; align-items: flex-start; }
+.hero__hook svg { flex-shrink: 0; margin-top: 3px; color: var(--accent-hot); }
+.hero__hook b { font-weight: 600; letter-spacing: -0.01em; }
+.hero__hook span { color: var(--text-muted); }
+.hero__hook p { font-size: var(--fs-sm); line-height: 1.45; }
+/* Хук с длинной первой фразой: на компьютере серый хвост уходит
+   на свою строку, чтобы не рвался посередине. */
+@media (min-width: 1024px) { .hero__hook--split span { display: block; } }
+
+/* кнопка и счётчик — в одну строку */
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-top: 32px;
+}
+.hero__actions .btn--cta { padding-inline: 24px; }
+.hero__counter { display: flex; align-items: baseline; gap: 9px; flex-wrap: nowrap; }
+.hero__counter b {
+  font-size: clamp(1.4rem, 1.8vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+.hero__counter span { font-size: var(--fs-sm); color: var(--text-muted); white-space: nowrap; }
+
+/* ---------- правая колонка: надпись + фото одним блоком ---------- */
+.hero__media { display: grid; gap: 16px; }
+
+.hero__caption-title {
+  display: block;
+  font-size: clamp(1rem, 1.4vw, 1.22rem);
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.hero__caption-sub { display: block; margin-top: 6px; font-size: var(--fs-sm); color: var(--text-muted); }
+
+.hero__photo {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+/* Переход между кадрами: растворение с микрозумом. Приходящий кадр
+   чуть наезжает и успокаивается, уходящий чуть раздаётся и тает.
+   Двигаются только opacity и transform — идёт на видеокарте. */
+.hero__slide {
+  position: absolute; inset: 0;
+  opacity: 0;
+  transform: scale(1.05);
+  transition: opacity .55s ease, transform .9s cubic-bezier(.22, .61, .36, 1);
+  will-change: opacity, transform;
+}
+.hero__slide.is-active { opacity: 1; transform: scale(1); }
+.hero__slide img { width: 100%; height: 100%; object-fit: cover; }
+
+/* заглушка вместо реального фото (ТЗ §3.1) */
+.photo-stub {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  width: 100%; height: 100%;
+  padding: 24px;
+  border: 1px dashed rgba(255, 190, 180, .34);
+  border-radius: var(--radius);
+  background: rgba(10, 5, 6, .42);
+  text-align: center;
+}
+.photo-stub__tag {
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255, 140, 130, .85);
+}
+.photo-stub__text { font-size: var(--fs-sm); line-height: 1.4; max-width: 30ch; color: var(--text-muted); }
+
+/* =====================================================================
+   Смена текста «роликом»: старая строка уезжает вверх, новая приходит
+   снизу. Обе строки в одной ячейке grid — вёрстка не дёргается.
+   Двигаем только transform и opacity: работает на композиторе.
+   ===================================================================== */
+.roll { display: grid; position: relative; overflow: hidden; }
+.roll__line {
+  grid-area: 1 / 1;
+  display: block;
+  transition: transform .55s cubic-bezier(.22,.61,.36,1), opacity .42s ease;
+}
+.roll__line--enter { transform: translateY(108%); opacity: 0; }
+.roll__line--leave { transform: translateY(-108%); opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .roll__line, .hero__slide { transition: none; }
+  .hero__slide { transform: none; }
+}
+
+/* =====================================================================
+   БЛОК 2 — Бегущая строка: корпоративные клиенты
+   Едет через transform: это идёт на видеокарте и почти ничего не стоит.
+   За экраном и при выключенных анимациях останавливается.
+   ===================================================================== */
+.clients {
+  border-block: 1px solid var(--line);
+  padding-block: 16px 14px;
+  background: #060304;
+}
+.clients__strip {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.clients__track {
+  display: flex;
+  width: max-content;
+  animation: clients-run 42s linear infinite;
+}
+/* Две одинаковые группы. Сдвиг на -50% = ровно одна группа,
+   поэтому лента идёт по кругу без разрыва и пустоты. */
+.clients__group { display: flex; align-items: center; gap: 44px; padding-right: 44px; }
+.clients__strip:hover .clients__track,
+.clients__track.is-paused,
+.clients__track.is-held { animation-play-state: paused; }   /* is-held — остановили нажатием */
+.clients__item {
+  display: flex; align-items: center; gap: 40px;
+  font-size: clamp(0.9rem, 1.15vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.clients__item::after { content: '·'; color: var(--accent); }
+.clients__note {
+  margin-top: 12px;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+@keyframes clients-run { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .clients__track { animation: none; } }
+
+/* =====================================================================
+   БЛОК 3 — Настройка ГБО. Три переключаемых подблока.
+   Фон чёрный, без кирпича.
+   ===================================================================== */
+.tuning { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); }
+
+.tuning__title {
+  font-size: clamp(1.5rem, 2.95vw, 3.4rem);
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+}
+@media (min-width: 1024px) { .tuning__title { white-space: nowrap; } }
+/* на телефоне заголовок должен ложиться в две строки, а не в три */
+@media (max-width: 600px) {
+  .tuning__title { font-size: clamp(1.15rem, 5.4vw, 1.5rem); line-height: 1.2; text-wrap: pretty; }
+}
+
+/* ---------- плашки-переключатели ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: clamp(28px, 4vw, 44px); }
+.tab {
+  height: 48px;
+  padding-inline: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,.04);
+  color: var(--text-muted);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s;
+}
+.tab:hover { color: var(--text); border-color: var(--text-dim); }
+.tab.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 24px -6px rgba(212,36,31,.85);
+}
+
+/* ---------- сцена подблока ---------- */
+.tuning__stage { position: relative; margin-top: clamp(24px, 3vw, 36px); }
+
+.tuning__arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  display: none;
+  place-items: center;
+  width: 40px; height: 56px;
+  color: var(--text-muted);
+  opacity: .4;
+  transition: opacity .2s, color .2s, transform .2s;
+}
+.tuning__arrow svg { stroke-width: 1.5; }
+.tuning__arrow:hover { opacity: 1; color: var(--text); }
+.tuning__arrow--prev:hover { transform: translateX(-3px); }
+.tuning__arrow--next:hover { transform: translateX(3px); }
+.tuning__arrow--prev { left: calc(-1 * var(--pad) + 4px); }
+.tuning__arrow--next { right: calc(-1 * var(--pad) + 4px); }
+@media (min-width: 1320px) { .tuning__arrow { display: grid; } }
+
+/* ---------- содержимое подблока: слева текст, справа фото ---------- */
+.panel { display: grid; row-gap: 26px; column-gap: clamp(32px, 5vw, 88px); align-items: start; }
+/* без этого содержимое колонок вылезает за край подблока: у элемента сетки
+   минимальная ширина по умолчанию равна ширине содержимого, а не нулю */
+.panel > * { min-width: 0; }
+@media (min-width: 1024px) {
+  .panel { grid-template-columns: 1fr 1fr; align-items: center; }
+  /* строка-вывод и сноска идут во всю ширину — чтобы влезали в одну строку */
+  .panel__foot { grid-column: 1 / -1; }
+  /* подблок с панелями: слева плашки с текстом, справа фото */
+  .panel--cards .panel__cards-wrap { grid-column: 1; grid-row: 1; }
+  .panel--cards .panel__media      { grid-column: 2; grid-row: 1; }
+
+  /* Подблоки с фото (не с панелями): вывод и кнопка остаются в левой
+     колонке, на уровне с фотографией. Раньше они уходили во всю ширину
+     под высокое фото — слева зиял пустой кусок, страница растягивалась. */
+  .panel--shots .panel__foot { grid-column: 1; }
+  /* фото стоит по центру своей колонки, не прижимаясь ни к тексту, ни к краю.
+     Центрируем саму ленту, а не колонку: justify-self схлопывал колонку
+     до ширины содержимого, и кадры сжимались почти в ноль. */
+  .panel--shots .panel__media { justify-self: stretch; }
+}
+
+.panel__heading {
+  font-size: clamp(1.3rem, 2vw, 1.75rem);
+  letter-spacing: -0.03em;
+  margin-bottom: 22px;
+}
+.panel__group + .panel__group { margin-top: 24px; }
+.panel__h {
+  display: block;
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
+}
+/* приглушённый текст, ключевая мысль — белым */
+.panel__text { font-size: var(--fs-lead); line-height: 1.55; color: var(--text-muted); }
+.panel__text b { font-weight: 600; color: var(--text); }
+
+/* ---------- две панели «тип впрыска» вместо сплошных абзацев ---------- */
+.panel__cards-wrap { display: grid; gap: 16px; }
+.panel__cards-lead {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.panel__cards { display: grid; gap: 14px; align-items: start; }
+/* одна под другой — так задал заказчик */
+
+.panel__card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: clamp(18px, 2.4vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+.panel__card-h {
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.panel__card-sub {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--accent-hot);
+}
+.panel__card-text { font-size: var(--fs-sm); line-height: 1.6; color: var(--text-muted); }
+.panel__card-text b { font-weight: 600; color: var(--text); }
+.panel__card-note { font-size: var(--fs-xs); line-height: 1.5; color: var(--text); }
+.panel__count {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.panel__cards-out {
+  font-size: var(--fs-sm);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ---------- термин со всплывающей подсказкой ----------
+   На компьютере открывается наведением, на телефоне — тапом (класс is-open).
+   Никаких модалок и библиотек: одна плашка на CSS. */
+.term {
+  position: relative;
+  display: inline;
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  font-weight: 600;
+  border-bottom: 1px dashed var(--accent-hot);
+  cursor: help;
+}
+.term__tip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  z-index: 20;
+  width: max-content;
+  max-width: min(280px, 78vw);
+  padding: 11px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #150d0e;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .55);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  color: var(--text-muted);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity .16s ease, transform .16s ease, visibility .16s;
+}
+.term.is-open .term__tip,
+.term:focus-visible .term__tip { opacity: 1; visibility: visible; transform: translateY(0); }
+@media (hover: hover) and (pointer: fine) {
+  .term:hover .term__tip { opacity: 1; visibility: visible; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .term__tip { transition: none; } }
+
+
+.panel__note {
+  margin-top: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--text);           /* видимая строка перед кнопкой, а не серая сноска */
+}
+
+.panel__foot { display: grid; gap: 18px; justify-items: start; }
+.panel__accent {
+  margin-top: 0;
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  color: #ff5b52;
+}
+
+/* отзыв карточкой */
+.panel__review {
+  margin-top: 26px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+.review__stars { display: flex; gap: 2px; color: #ffc531; }
+.review__text { margin-top: 10px; font-size: var(--fs-sm); line-height: 1.55; }
+.review__who { display: flex; align-items: center; gap: 11px; margin-top: 14px; }
+/* .panel__review — иначе более общее правило .review__who span (блок 7)
+   перебивает по специфичности и роняет букву в угол кружка */
+.panel__review .review__avatar {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  font-size: 0.95rem; font-weight: 700; line-height: 1;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.review__name { display: block; font-size: var(--fs-sm); font-weight: 600; }
+.review__meta { display: block; font-size: var(--fs-xs); color: var(--text-dim); }
+
+.panel__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.panel__ctas .btn {
+  height: auto;
+  min-height: 50px;
+  padding: 13px 20px;
+  font-size: clamp(0.7rem, 2.5vw, var(--fs-sm));
+  white-space: nowrap;      /* длинные подписи — одной аккуратной строкой */
+  text-align: center;
+}
+.panel__ctas .btn { max-width: 100%; }
+/* На телефонах уже 400 px длинная подпись в одну строку не влезает
+   и сдвигала всю страницу вбок — там разрешаем перенос. */
+@media (max-width: 400px) { .panel__ctas .btn { white-space: normal; } }
+
+/* ---------- фото в скруглённых плашках (блок 3) ----------
+   Плашка скруглена так же, как заглушка и кадр на первом экране.
+   Кадры вертикальные, пропорция 2/3 — ближе всего к исходникам,
+   поэтому object-fit подрезает минимально. */
+.shots { display: grid; gap: 14px; width: 100%; }
+.shots--2 { grid-template-columns: 1fr 1fr; }
+/* одиночный кадр не растягиваем на всю колонку и ставим по её центру */
+.shots--1 { max-width: 360px; margin-inline: auto; }
+
+.shot { margin: 0; display: grid; gap: 8px; }
+.shot__frame {
+  display: block;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+}
+.shot__frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot__cap {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* телефон: плашки одна под другой, чтобы кадры было видно крупно */
+@media (max-width: 700px) {
+  .shots--2 { grid-template-columns: 1fr; }
+  .shots--1 { max-width: none; }
+  .shot__frame { aspect-ratio: 4 / 5; }
+}
+
+/* правая колонка */
+.panel__media { display: grid; gap: 16px; }
+.panel__figure {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  max-height: 360px;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.panel__figure img { width: 100%; height: 100%; object-fit: cover; }
+
+.panel__figure .photo-stub { width: 100%; height: 100%; }
+
+/* смена подблока — мягкое проявление */
+.panel { animation: panel-in .35s ease both; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+
+/* карточка отзыва как ссылка на Яндекс.Карты */
+.panel__review.is-link { display: block; transition: border-color .2s, background-color .2s; }
+.panel__review.is-link:hover { border-color: var(--text-dim); background: #1b1214; }
+.review__go { margin-left: auto; color: var(--text-dim); transition: color .2s, transform .2s; }
+.panel__review.is-link:hover .review__go { color: var(--text); transform: translateX(3px); }
+
+/* =====================================================================
+   БЛОК 4 — Сравнение подходов.
+   Слева таблица «как делают все / как делаем мы», справа фото работ.
+   ===================================================================== */
+.compare { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+
+.compare__title {
+  font-size: clamp(1.5rem, 2.95vw, 3.4rem);
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+}
+
+/* Подзаголовок под заголовком — приглушённый, как строка про моторы
+   на первом экране. Заголовок теперь длинный, поэтому перенос строки
+   ему больше не запрещаем. */
+.compare__sub {
+  margin-top: 12px;
+  max-width: 48ch;
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+  text-wrap: balance;
+}
+
+.compare__grid { display: grid; gap: clamp(28px, 4vw, 56px); margin-top: clamp(28px, 4vw, 48px); }
+@media (min-width: 1180px) { .compare__grid { grid-template-columns: 1.35fr 1fr; align-items: start; } }
+
+/* ---------- таблица ---------- */
+.compare__head { display: none; }
+@media (min-width: 720px) {
+  .compare__head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+}
+.compare__head span { font-size: var(--fs-sm); font-weight: 700; letter-spacing: .02em; }
+.compare__head span:first-child { color: var(--text-dim); }
+.compare__head span:last-child  { color: var(--accent-hot); }
+
+.compare__row {
+  display: grid;
+  gap: 10px 24px;
+  padding-block: 18px;
+  border-bottom: 1px solid var(--line);
+}
+@media (min-width: 720px) { .compare__row { grid-template-columns: 1fr 1fr; gap: 24px; } }
+
+.compare__them,
+.compare__us { display: flex; gap: 10px; font-size: var(--fs-sm); line-height: 1.5; }
+.compare__them { color: var(--text-dim); }
+.compare__us   { color: var(--text); }
+.compare__them svg { flex-shrink: 0; margin-top: 3px; color: var(--text-dim); }
+.compare__us   svg { flex-shrink: 0; margin-top: 3px; color: var(--accent-hot); }
+.compare__us b { font-weight: 700; color: var(--accent-hot); }
+
+/* на телефоне колонки идут друг под другом — подписываем, где чей подход */
+@media (max-width: 719px) {
+  .compare__them, .compare__us { display: grid; grid-template-columns: auto 1fr; column-gap: 10px; }
+  .compare__head + .compare__row .compare__them::before,
+  .compare__head + .compare__row .compare__us::before {
+    content: attr(data-label);
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .compare__them::before { color: var(--text-dim); }
+  .compare__us::before   { color: var(--accent-hot); }
+}
+
+.compare__closing {
+  margin-top: 26px;
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ---------- фото работ ---------- */
+.compare__photos { display: grid; gap: 14px; }
+@media (min-width: 560px) and (max-width: 1179px) { .compare__photos { grid-template-columns: 1fr 1fr; } }
+.compare__figure {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.compare__figure img { width: 100%; height: 100%; object-fit: cover; }
+.compare__figure .photo-stub { width: 100%; height: 100%; }
+
+/* ---------- телефон: фото наслаиваются при прокрутке ----------
+   Эффект из «золотого репо» (липкие карточки с уменьшением), переписанный
+   на чистый CSS: стопку даёт position: sticky — без единой строчки JS,
+   уменьшение — скролл-анимация. Где браузер её не понимает, карточки
+   просто останутся стопкой, блок не сломается. */
+@media (max-width: 700px) {
+  .compare__photos {
+    display: block;
+    padding-bottom: 26vh;          /* запас, чтобы последний кадр успел приклеиться */
+  }
+  .compare__figure {
+    position: sticky;
+    aspect-ratio: 4 / 5;           /* все кадры одного размера */
+    margin-bottom: 20px;
+    transform-origin: top center;
+    box-shadow: 0 -18px 34px rgba(0, 0, 0, .6);
+    border: 1px solid var(--line);
+  }
+  .compare__figure:nth-child(1) { top: calc(var(--header-h) + 14px); }
+  .compare__figure:nth-child(2) { top: calc(var(--header-h) + 28px); }
+  .compare__figure:nth-child(3) { top: calc(var(--header-h) + 42px); }
+  .compare__figure:nth-child(4) { top: calc(var(--header-h) + 56px); }
+
+  @supports (animation-timeline: view()) {
+    .compare__figure {
+      animation: shot-shrink linear both;
+      animation-timeline: view();
+      animation-range: exit-crossing 0% exit-crossing 100%;
+    }
+    @keyframes shot-shrink { to { transform: scale(.9); } }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare__figure { animation: none; position: static; }
+}
+
+/* =====================================================================
+   БЛОК 5 — Калькулятор, гарантия, состав комплекта
+   ===================================================================== */
+.calc { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+
+.calc__title {
+  font-size: clamp(1.5rem, 2.95vw, 3.4rem);
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+}
+@media (min-width: 1024px) { .calc__title { white-space: nowrap; } }
+
+.calc__grid { display: grid; gap: clamp(24px, 3vw, 40px); margin-top: clamp(28px, 4vw, 48px); }
+.calc__grid > * { min-width: 0; }   /* колонки сжимаются по экрану, а не распирают его */
+@media (min-width: 980px) { .calc__grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+/* ---------- ползунки ---------- */
+.calc__inputs {
+  display: grid;
+  gap: 26px;
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  align-content: start;
+}
+.slider { display: grid; gap: 12px; }
+.slider__top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.slider__label { font-size: var(--fs-sm); color: var(--text-muted); }
+.slider__value { font-size: var(--fs-sm); color: var(--text-dim); white-space: nowrap; }
+.slider__value b {
+  font-size: 1.35rem; font-weight: 700; color: var(--text);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+
+input[type="range"].range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #241a1c;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"].range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 5px solid var(--accent-hot);
+  cursor: grab;
+}
+input[type="range"].range::-moz-range-thumb {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 5px solid var(--accent-hot);
+  cursor: grab;
+}
+input[type="range"].range:active::-webkit-slider-thumb { cursor: grabbing; }
+input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); outline-offset: 8px; }
+
+/* ---------- результат ---------- */
+.calc__out {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+.calc__legend { font-size: var(--fs-xs); color: var(--text-dim); text-align: right; }
+
+.calc__row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.calc__row:last-of-type { border-bottom: 0; }
+.calc__row span { font-size: var(--fs-sm); color: var(--text-muted); }
+.calc__row b { font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.calc__save {
+  display: grid; gap: 4px;
+  margin-top: 6px;
+  padding: 18px 20px;
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-sm);
+  background: var(--green-soft);
+}
+.calc__save span { font-size: var(--fs-sm); color: var(--green-dim); }
+.calc__save b {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 800; letter-spacing: -0.035em;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.calc__disclaimer {
+  margin-top: 12px;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.calc__save i { font-size: var(--fs-sm); font-style: normal; color: var(--text-muted); }
+.calc__go {
+  margin-top: 10px;
+  height: auto; min-height: 54px;
+  padding: 14px 22px;
+  white-space: nowrap;         /* «Узнать точную цену…» — одной строкой */
+  text-align: center;
+  justify-content: center;
+  font-size: clamp(0.72rem, 2.6vw, 1rem);
+}
+
+/* ---------- CTA после расчёта ---------- */
+.calc__cta { display: grid; gap: 12px; margin-top: 6px; }
+.calc__cta[hidden] { display: none; }
+.calc__cta .field__box input { padding-right: 16px; font-size: var(--fs-body); font-weight: 500; }
+.calc__cta .btn {
+  height: auto;
+  min-height: 54px;
+  padding: 14px 24px;
+  white-space: normal;
+  text-align: center;
+  justify-content: center;
+}
+.calc__err { font-size: var(--fs-xs); color: var(--accent-hot); }
+.calc__err[hidden] { display: none; }
+
+/* ---------- раскрывающиеся пункты ---------- */
+.acc { margin-top: clamp(24px, 3vw, 36px); border-top: 1px solid var(--line); }
+.acc__item { border-bottom: 1px solid var(--line); }
+.acc__head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  width: 100%;
+  padding: 18px 0;
+  text-align: left;
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  transition: color .2s;
+}
+.acc__head:hover { color: var(--accent-hot); }
+.acc__head svg { flex-shrink: 0; color: var(--text-dim); transition: transform .25s, color .2s; }
+.acc__item.is-open .acc__head svg { transform: rotate(180deg); color: var(--accent-hot); }
+.acc__panel { overflow: hidden; max-height: 0; transition: max-height .3s ease; }
+.acc__inner { padding-bottom: 22px; display: grid; gap: 12px; }
+.acc__list { display: grid; gap: 10px; }
+.acc__list li { display: flex; gap: 10px; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-muted); }
+.acc__list svg { flex-shrink: 0; margin-top: 3px; color: var(--accent-hot); }
+.acc__list b { color: var(--text); font-weight: 600; }
+.acc__text { font-size: var(--fs-sm); line-height: 1.6; color: var(--text-muted); }
+.acc__closing {
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text);
+}
+@media (prefers-reduced-motion: reduce) { .acc__panel { transition: none; } }
+
+/* ---------- гарантия ---------- */
+.warranty { margin-top: clamp(40px, 6vw, 72px); }
+.warranty__title {
+  font-size: clamp(1.55rem, 2.6vw, 2.15rem);
+  letter-spacing: -0.03em;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.warranty__note {
+  margin-top: 14px;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  text-align: center;
+}
+.warranty__cards { display: grid; gap: 16px; }
+@media (min-width: 720px) { .warranty__cards { grid-template-columns: 1fr 1fr; } }
+.warranty__card {
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+.warranty__card.is-good { border-color: var(--green-line); background: var(--green-soft); }
+.warranty__type { display: block; font-size: clamp(1.05rem, 1.5vw, 1.25rem); font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+.warranty__km {
+  display: block; margin-top: 8px;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800; letter-spacing: -0.04em;
+}
+.warranty__card.is-good .warranty__km { color: var(--green); }
+.warranty__or { display: block; margin-top: 4px; font-size: var(--fs-sm); color: var(--text-dim); }
+
+
+/* =====================================================================
+   БЛОК 6 — Мастера и «Чего мы не делаем»
+   ===================================================================== */
+/* =====================================================================
+   Лента фото «как док» — между гарантией и мастерами.
+   Карточка в центре яркая и приподнята, соседние тусклее и мельче.
+   ===================================================================== */
+.gallery { background: var(--bg); padding-block: clamp(48px, 6vw, 80px) clamp(32px, 4vw, 56px); border-top: 1px solid var(--line); }
+.gallery__title {
+  font-size: clamp(1.5rem, 2.6vw, 2.7rem);
+  letter-spacing: -0.035em;
+  text-align: center;
+  text-wrap: balance;
+}
+.dock {
+  --dock-w: 240px;             /* ширина «окна» по центру, под неё считаются поля */
+  --dock-h: 420px;             /* высота карточек одна на всю ленту */
+  display: flex;
+  gap: 28px;
+  margin-top: clamp(12px, 2vw, 20px);
+  padding: 28px calc(50% - var(--dock-w) / 2) 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dock::-webkit-scrollbar { display: none; }
+.dock.is-dragging { scroll-snap-type: none; cursor: grabbing; }
+.dock.is-dragging * { pointer-events: none; }
+@media (hover: none) { .dock { scroll-snap-type: x mandatory; } }
+.dock__item { flex: 0 0 auto; scroll-snap-align: center; cursor: pointer; }
+.dock__card {
+  position: relative;
+  height: var(--dock-h);
+  aspect-ratio: 9 / 16;        /* запасное значение; настоящее ставится по кадру */
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #0b0607 center / cover no-repeat;
+  opacity: .45;
+  transform: scale(.88);
+  transition: opacity .22s ease-out, transform .22s ease-out;
+}
+.dock__item.is-active .dock__card { opacity: 1; transform: translateY(-12px) scale(1); }
+/* contain, а не cover: кадр показываем целиком, ничего не срезаем */
+.dock__card img,
+.dock__card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* пока ролик не пошёл — видно обложку под ним */
+.dock__card video { opacity: 0; transition: opacity .2s ease-out; }
+.dock__item.is-playing .dock__card video { opacity: 1; }
+.dock__card picture { display: block; width: 100%; height: 100%; }
+.dock__card .photo-stub { padding: 12px; }
+
+/* значок «play» — виден, пока ролик стоит */
+.dock__play {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.6);
+  pointer-events: none;
+  transition: opacity .2s ease-out;
+}
+.dock__item--video.is-playing .dock__play { opacity: 0; }
+
+/* кнопка звука */
+.dock__sound {
+  position: absolute; right: 10px; bottom: 10px;
+  display: grid; place-items: center;
+  width: 46px; height: 46px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 50%;
+  background: rgba(10,5,6,.55);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.dock__sound.is-on { border-color: var(--accent-hot); background: rgba(255,42,32,.3); }
+.dock__item:not(.is-active) .dock__sound { opacity: 0; pointer-events: none; }
+@media (max-width: 600px) { .dock { --dock-w: 200px; --dock-h: 340px; gap: 14px; } }
+@media (prefers-reduced-motion: reduce) { .dock__card { transition: none; } }
+
+.team { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+
+.team__title {
+  font-size: clamp(1.5rem, 2.6vw, 2.7rem);
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.team__grid { display: grid; gap: 20px; margin-top: clamp(28px, 4vw, 44px); }
+/* Четыре мастера — в одну строку на большом экране, по две на планшете,
+   по одной на телефоне. */
+@media (min-width: 620px)  { .team__grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1024px) { .team__grid { grid-template-columns: repeat(4, 1fr); } }
+/* Карточки ряда делят общие строки сетки: фото, должность, имя, стаж
+   и цитата у всех стоят на одних линиях, даже если должность в две строки. */
+@media (min-width: 620px) {
+  .person { grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
+  .person > div { display: contents; }
+  .person__figure { margin-bottom: 16px; }
+  .person__role, .person__name, .person__years, .person__quote { align-self: start; }
+}
+
+.person {
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 2.5vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+/* Портреты вертикальные — кадр под них, иначе горизонтальная рамка
+   срезала бы людям головы. */
+.person__figure {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.person__figure img { width: 100%; height: 100%; object-fit: cover; }
+.person__figure .photo-stub { width: 100%; height: 100%; border-radius: var(--radius-sm); }
+.person__role { display: block; min-height: 1.2em; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-hot); }
+.person__name { display: block; margin-top: 6px; min-height: 1.4em; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
+.person__years { display: block; margin-top: 4px; min-height: 1.4em; font-size: var(--fs-sm); color: var(--text-muted); }
+.person__slot {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--text-dim);
+  opacity: .75;
+}
+.person__slot::before { content: '— '; }
+.person--empty .person__role .person__slot { color: rgba(255,140,130,.7); }
+.person__quote { margin-top: 12px; min-height: 3em; font-size: var(--fs-sm); line-height: 1.55; color: var(--text-muted); }
+
+/* ---------- чего мы не делаем ---------- */
+.not { margin-top: clamp(40px, 6vw, 72px); }
+.not__title {
+  font-size: clamp(1.25rem, 1.9vw, 1.7rem);
+  letter-spacing: -0.03em;
+}
+.not__list { display: grid; gap: 14px; margin-top: 20px; }
+@media (min-width: 900px) { .not__list { grid-template-columns: 1fr 1fr; gap: 14px 32px; } }
+.not__item { display: flex; gap: 11px; align-items: flex-start; font-size: var(--fs-body); line-height: 1.5; }
+.not__item svg { flex-shrink: 0; margin-top: 4px; color: var(--text-dim); }
+.not__item b { font-weight: 600; color: var(--text); }
+.not__item span { color: var(--text-muted); }
+.not__item a { color: var(--accent-hot); border-bottom: 1px solid rgba(255,42,32,.4); }
+.not__item a:hover { border-bottom-color: var(--accent-hot); }
+
+/* =====================================================================
+   БЛОК 7 — Отзывы. Оформление под Яндекс.Карты.
+   ===================================================================== */
+.reviews { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+
+.reviews__head { display: grid; gap: 20px; }
+@media (min-width: 1000px) {
+  .reviews__head { grid-template-columns: 1fr auto; align-items: center; gap: 28px; }
+  /* Яндекс слева, Авито справа — строго в одну линию, не друг под другом */
+  .reviews__ratings { flex-wrap: nowrap; }
+  .reviews__ratings .rating { flex: 0 0 auto; width: 250px; max-width: none; }
+}
+.reviews__lead {
+  font-size: clamp(1.5rem, 2.6vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+/* две плашки рейтинга (сначала Яндекс, затем Авито) — в один ряд справа от заголовка */
+.reviews__ratings { display: flex; flex-wrap: wrap; gap: 10px; }
+.reviews__ratings .rating { flex: 1 1 210px; max-width: 280px; }
+
+/* карточка рейтинга — как в карточке организации */
+.rating {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  transition: border-color .2s, background-color .2s, transform .12s ease-out;
+}
+a.rating:hover { border-color: var(--text-dim); background: #1b1214; }
+a.rating:active { transform: scale(.98); }
+.rating__value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.rating__stars { display: flex; gap: 2px; color: #ffc531; }
+.rating__counts { display: block; margin-top: 5px; font-size: var(--fs-xs); color: var(--text-dim); }
+.rating__src { display: block; margin-top: 2px; font-size: var(--fs-xs); color: var(--text-muted); }
+.rating__go { margin-left: 4px; color: var(--text-dim); transition: color .2s, transform .2s; }
+a.rating:hover .rating__go { color: var(--text); transform: translateX(3px); }
+
+/* сетка отзывов */
+.reviews__grid { display: grid; gap: 16px; margin-top: clamp(26px, 3.5vw, 40px); }
+@media (min-width: 700px)  { .reviews__grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1180px) { .reviews__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.review {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  transition: border-color .2s, background-color .2s, transform .12s ease-out;
+}
+a.review:hover { border-color: var(--text-dim); background: #1b1214; }
+a.review:active { transform: scale(.98); }
+.review__top { display: flex; align-items: center; gap: 12px; }
+.review__ava {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  font-size: 1rem; font-weight: 700; line-height: 1;
+  text-transform: uppercase;
+}
+.review__who b { display: block; font-size: var(--fs-body); font-weight: 600; letter-spacing: -0.01em; }
+.review__who span { display: block; margin-top: 2px; font-size: var(--fs-xs); color: var(--text-dim); }
+.review__body { font-size: var(--fs-sm); line-height: 1.55; color: var(--text-muted); }
+.review__foot { display: flex; align-items: center; gap: 7px; font-size: var(--fs-xs); color: var(--text-dim); }
+.review__foot svg { color: var(--text-dim); }
+a.review:hover .review__foot { color: var(--text-muted); }
+
+
+/* CTA после отзывов */
+.reviews__cta {
+  display: grid; gap: 16px;
+  margin-top: clamp(28px, 4vw, 44px);
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+@media (min-width: 900px) { .reviews__cta { grid-template-columns: 1fr auto; align-items: center; } }
+.reviews__cta p { font-size: clamp(1.1rem, 1.7vw, 1.4rem); font-weight: 600; letter-spacing: -0.025em; }
+.reviews__buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+.reviews__buttons .btn { height: auto; min-height: 52px; padding: 13px 22px; white-space: normal; text-align: center; }
+
+/* =====================================================================
+   БЛОК 8 — Частые вопросы. Открытые карточки вопрос-ответ.
+   ===================================================================== */
+.faq { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+
+.faq__lead {
+  font-size: clamp(1.5rem, 2.6vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+/* Список-«гармошка»: вопрос виден всегда, ответ раскрывается по клику
+   на строку. Поведение и стрелка — общие с блоком 5 (класс .acc). */
+.faq__acc {
+  max-width: 880px;
+  margin-top: clamp(28px, 4vw, 44px);
+}
+.faq__acc .acc__head {
+  gap: 20px;
+  padding: 20px 0;
+  font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+  font-weight: 600;
+}
+.faq__acc .acc__head > span { flex: 1; }
+.faq__acc .acc__text { font-size: var(--fs-body); line-height: 1.65; }
+.faq__acc .acc__inner { padding-bottom: 24px; gap: 16px; }
+
+/* фото к вопросу про багажник — лента внутри раскрытого ответа */
+.faq__acc .strip { margin-top: 4px; }
+
+/* =====================================================================
+   БЛОК 9 — Как доехать
+   ===================================================================== */
+.loc { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+
+.loc__lead {
+  font-size: clamp(1.5rem, 2.6vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.loc__grid { display: grid; gap: clamp(20px, 3vw, 32px); margin-top: clamp(28px, 4vw, 44px); }
+@media (min-width: 1000px) { .loc__grid { grid-template-columns: 1.2fr 1fr; align-items: start; } }
+
+/* Карта — статичная картинка (OpenStreetMap) со ссылкой на Яндекс.Карты.
+   Встраиваемый iframe Яндекса не отрисовывался, поэтому здесь картинка:
+   она видна всегда, а по клику открывается настоящая карта. */
+.loc__map {
+  position: relative;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.loc__map-img { display: block; width: 100%; height: auto; }
+.loc__map:hover { border-color: var(--text-dim); }
+
+/* ---------- лента фото (блок 9 и блок 8): листается влево-вправо ---------- */
+.strip { position: relative; margin-top: 14px; }
+.strip__track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+.strip__track::-webkit-scrollbar { height: 6px; }
+.strip__track::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+.strip__item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.strip__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* кадры одного размера — фото аккуратно подрезаются */
+}
+.strip__item .photo-stub { width: 100%; height: 100%; }
+
+/* Плавное появление фото после загрузки — вместо резкого выскакивания
+   в уже отведённой рамке.
+
+   ВАЖНО: прячем фото только под классом .js-fade, который ставит на <html>
+   сам скрипт (wireImageFade в app.js). Если скрипт по любой причине не
+   отработает — фото просто видны сразу, без анимации. Без этой страховки
+   сломанный JS означал бы сайт вообще без фотографий. */
+.js-fade .strip__item img,
+.js-fade .compare__figure img,
+.js-fade .person__figure img,
+.js-fade .loc__shot img { opacity: 0; transition: opacity .3s ease; }
+
+.js-fade .strip__item img.is-loaded,
+.js-fade .compare__figure img.is-loaded,
+.js-fade .person__figure img.is-loaded,
+.js-fade .loc__shot img.is-loaded { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-fade .strip__item img,
+  .js-fade .compare__figure img,
+  .js-fade .person__figure img,
+  .js-fade .loc__shot img { opacity: 1; transition: none; }
+}
+
+/* пропорции плиток под каждый блок */
+.strip--faq .strip__item { width: clamp(132px, 30%, 158px); aspect-ratio: 3 / 4; }
+
+/* стрелки — на десктопе; на телефоне листаем свайпом */
+.strip__nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 2;
+  display: none;
+  place-items: center;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: rgba(11, 7, 8, .82);
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: background-color .2s, border-color .2s, opacity .16s ease;
+}
+.strip__nav:hover { background: var(--accent); border-color: var(--accent); }
+.strip__nav--prev { left: 8px; }
+.strip__nav--next { right: 8px; }
+/* видимость стрелки — отдельно от того, показываем ли их вообще:
+   так логика одинакова и не зависит от медиазапроса ниже */
+.strip__nav.is-visible { opacity: 1; pointer-events: auto; }
+
+/* сами стрелки только там, где есть мышь; на телефоне листают свайпом */
+@media (hover: hover) and (pointer: fine) {
+  .strip__nav:not([hidden]) { display: grid; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip__nav { transition: background-color .2s, border-color .2s; }
+}
+
+/* правая колонка */
+.loc__info { display: grid; gap: 22px; align-content: start; }
+.loc__addr {
+  font-size: clamp(1.15rem, 1.7vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.loc__note {
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--text);
+}
+.loc__block b { display: block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
+.loc__hours { margin-top: 6px; font-size: var(--fs-body); color: var(--text-muted); }
+
+.loc__routes { margin-top: 8px; display: grid; gap: 0; }
+.loc__route {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding-block: 11px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+.loc__route span:first-child { color: var(--text-muted); }
+.loc__route span:last-child { color: var(--text); font-weight: 600; }
+.loc__route span:last-child:empty::before { content: '— мин'; color: var(--text-dim); font-weight: 400; }
+
+
+/* фото гаража — во всю ширину блока, все четыре сразу видно */
+.loc__gallery {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: clamp(20px, 3vw, 32px);
+}
+@media (min-width: 860px) { .loc__gallery { grid-template-columns: repeat(4, 1fr); } }
+.loc__shot {
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.loc__shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.loc__shot .photo-stub { width: 100%; height: 100%; }
+
+/* =====================================================================
+   БЛОК 10 — Форма записи. Одна плашка, чуть уже основного экрана.
+   ===================================================================== */
+.form { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+
+.form__card {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(26px, 4vw, 44px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+}
+.form__lead {
+  font-size: clamp(1.4rem, 2.4vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+@media (min-width: 760px) { .form__lead { white-space: nowrap; } }
+
+.form__submit {
+  height: auto; min-height: 62px;
+  padding: 19px 40px;
+  font-size: 1rem;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;      /* «Записаться на установку» — одной строкой */
+}
+@media (max-width: 400px) {
+  .form__submit { padding-inline: 22px; font-size: .95rem; }
+}
+
+.form__note {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ---------- форма заявки: низ страницы и всплывающее окно ----------
+   Всё по центру, поля друг под другом, кнопка на всю ширину. */
+.form__card { justify-items: center; text-align: center; max-width: 560px; }
+.form__lead {
+  white-space: nowrap;          /* ровно две строки: перенос задан в тексте */
+  font-size: clamp(0.92rem, 4.8vw, 1.75rem);
+}
+
+.lead { display: grid; gap: 14px; width: 100%; text-align: left; }
+.lead__field { display: grid; gap: 6px; }
+.lead__field span { font-size: var(--fs-sm); color: var(--text-muted); }
+.lead__field span i { font-style: normal; color: var(--text-dim); }
+.lead__field .lead__req { color: var(--accent-hot); }
+.lead__field input {
+  width: 100%; height: 54px; padding: 0 16px;
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  font-size: 1rem;   /* от 16 px — чтобы iPhone не увеличивал страницу при вводе */
+  transition: border-color .15s;
+}
+.lead__field input::placeholder { color: var(--text-dim); }
+.lead__field input:focus { outline: none; border-color: var(--accent-hot); }
+.lead__check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.lead__check input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--accent-btn); }
+.lead__check span { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-muted); }
+.lead__check a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.lead__err { font-size: var(--fs-xs); font-style: normal; color: #ff8a82; text-align: center; }
+.lead__err[hidden] { display: none; }
+.lead__trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+/* кнопка: тусклая, пока нет номера; яркая, как только номер введён —
+   и на компьютере, и на телефоне, без наведения мыши */
+.lead__action { display: flex; justify-content: center; margin-top: 4px; }
+.lead__submit {
+  position: relative;
+  width: 100%; min-height: 58px; height: auto; padding: 16px 24px;
+  font-size: 1.02rem;
+  background: var(--accent-deep); border: 1px solid #7a1d19; color: rgba(255, 255, 255, .78);
+  box-shadow: none; text-shadow: none;
+  transition: width .38s cubic-bezier(.22,.61,.36,1), border-radius .38s cubic-bezier(.22,.61,.36,1),
+              padding .38s ease, background-color .2s ease, border-color .2s ease,
+              box-shadow .2s ease, color .2s ease;
+}
+.lead__submit.is-ready {
+  background: var(--accent-btn); border-color: #ff7a72; color: #fff;
+  text-shadow: 0 0 16px rgba(255, 255, 255, .85), 0 0 34px rgba(255, 255, 255, .4);
+  box-shadow: 0 0 26px -4px rgba(255, 42, 32, .75);
+}
+.lead__tick { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity .2s ease .2s; }
+
+/* после отправки кнопка сворачивается в зелёную галочку */
+.lead.is-sent .lead__field,
+.lead.is-sent .lead__check,
+.lead.is-sent .lead__err { display: none; }
+.lead.is-sent .lead__submit {
+  width: 58px; min-height: 58px; height: 58px; padding: 0; border-radius: 50%;
+  background: var(--green-soft); border-color: var(--green-line); color: var(--green);
+  box-shadow: none; text-shadow: none; cursor: default;
+}
+.lead.is-sent .lead__label { opacity: 0; white-space: nowrap; }
+.lead.is-sent .lead__tick { opacity: 1; }
+.lead__submit:disabled { cursor: default; }
+
+.lead__after { display: grid; gap: 14px; justify-items: center; text-align: center; animation: lead-in .3s ease both; }
+.lead__after[hidden] { display: none; }
+@keyframes lead-in { from { opacity: 0; transform: translateY(6px); } }
+.lead__wa {
+  width: 100%; min-height: 58px; height: auto; gap: 10px;
+  background: var(--wa); color: #fff; border: 1px solid var(--wa);
+  box-shadow: 0 0 24px -6px rgba(37, 211, 102, .7);
+}
+.lead__wa:hover { background: var(--wa-hover); border-color: var(--wa-hover); }
+@media (prefers-reduced-motion: reduce) {
+  .lead__submit, .lead__tick { transition: none; }
+  .lead__after { animation: none; }
+}
+
+/* ---------- всплывающее окно ---------- */
+html.is-modal { overflow: hidden; }
+.modal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; }
+.modal[hidden] { display: none; }
+.modal__backdrop {
+  position: absolute; inset: 0; background: rgba(4, 2, 3, .78);
+  opacity: 0; transition: opacity .2s ease;
+}
+.modal__card {
+  position: relative;
+  width: 100%; max-width: 440px; max-height: calc(100dvh - 32px); overflow-y: auto;
+  padding: 34px 24px 26px;
+  background: var(--bg-elevated); border: 1px solid var(--line-strong); border-radius: var(--radius);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .6);
+  text-align: center;
+  opacity: 0; transform: translateY(12px) scale(.98);
+  transition: opacity .2s ease, transform .2s cubic-bezier(.22,.61,.36,1);
+}
+.modal.is-open .modal__backdrop { opacity: 1; }
+.modal.is-open .modal__card { opacity: 1; transform: none; }
+.modal__close {
+  position: absolute; top: 8px; right: 8px;
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border-radius: var(--radius-sm); color: var(--text-muted);
+}
+.modal__close:hover { color: var(--text); background: rgba(255, 255, 255, .05); }
+.modal__title { font-size: 1.6rem; letter-spacing: -0.03em; }
+.modal__sub { margin: 6px 0 20px; font-size: var(--fs-sm); color: var(--text-muted); }
+@media (prefers-reduced-motion: reduce) {
+  .modal__backdrop, .modal__card { transition: none; }
+}
+
+/* =====================================================================
+   БЛОК 11 — Подвал
+   ===================================================================== */
+.footer { background: #060304; border-top: 1px solid var(--line); padding-block: clamp(40px, 6vw, 64px); }
+
+.footer__grid { display: grid; gap: 28px; }
+@media (min-width: 720px) { .footer__grid { grid-template-columns: 1.4fr 1fr 1fr; } }
+
+.footer__brand { display: flex; align-items: center; gap: 10px; }
+.footer__logo { width: auto; height: 38px; }
+.footer__brand .logo__mark { width: 30px; height: 30px; }
+.footer__brand b { font-size: var(--fs-body); font-weight: 700; letter-spacing: -0.02em; }
+.footer__addr { margin-top: 14px; font-size: var(--fs-sm); line-height: 1.6; color: var(--text-muted); }
+.footer__disc { margin-top: 12px; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-dim); max-width: 44ch; }
+
+.footer__col b { display: block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+.footer__col a, .footer__col span { display: block; font-size: var(--fs-sm); color: var(--text-muted); padding-block: 10px; }
+.footer__col a { transition: color .15s; }
+.footer__col a:hover { color: var(--text); }
+
+.footer__bottom {
+  margin-top: clamp(28px, 4vw, 44px);
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+.footer__bottom a { display: inline-block; padding-block: 12px; color: var(--text-dim); transition: color .15s; }
+.footer__bottom a:hover { color: var(--text-muted); }
+.footer__links { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.footer__cookie { padding-block: 12px; font-size: inherit; color: var(--text-dim); transition: color .15s; }
+.footer__cookie:hover { color: var(--text-muted); }
+.footer__cookie[hidden] { display: none; }
+
+
+
+/* подпись под карточкой ленты */
+.dock__cap {
+  display: block;
+  margin-top: 10px;
+  max-width: 100%;
+  font-size: var(--fs-xs);
+  line-height: 1.35;
+  color: var(--text-dim);
+  text-align: center;
+  opacity: .55;
+  transition: opacity .2s ease-out, color .2s ease-out;
+}
+.dock__item.is-active .dock__cap { opacity: 1; color: var(--text-muted); }
+
+/* ---------- маленький ролик в углу ---------- */
+.reelfloat {
+  position: fixed;
+  left: 16px; bottom: 16px;
+  z-index: 70;
+  width: 116px;
+}
+.reelfloat__box {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0b0607 center / cover no-repeat;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+}
+.reelfloat__video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.reelfloat__badge {
+  position: absolute; left: 6px; bottom: 6px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(10,5,6,.62);
+  font-size: 11px; color: #fff;
+}
+.reelfloat__close {
+  position: absolute; top: -8px; right: -8px;
+  display: grid; place-items: center;
+  width: 24px; height: 24px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  background: rgba(10,5,6,.9);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+@media (max-width: 600px) { .reelfloat { width: 84px; left: 12px; bottom: 104px; } }
+
+/* ролик на весь экран */
+.reelbig { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: 16px; }
+.reelbig[hidden] { display: none; }
+.reelbig__backdrop { position: absolute; inset: 0; background: rgba(4,2,3,.82); backdrop-filter: blur(6px); }
+.reelbig__inner { position: relative; width: min(420px, 92vw); }
+.reelbig__video { width: 100%; max-height: 82vh; border-radius: 16px; display: block; background: #000; }
+.reelbig__close {
+  position: absolute; top: -14px; right: -14px;
+  display: grid; place-items: center;
+  width: 40px; height: 40px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  background: rgba(10,5,6,.92);
+  color: #fff;
+  cursor: pointer;
+}
