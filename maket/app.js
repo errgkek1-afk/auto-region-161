@@ -9,6 +9,8 @@
   var C = window.CFG;
   var ic = window.icon;
   var PREFERS_STILL = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* снимок страницы для поисковиков (prerender.py) — видео туда не грузим */
+  var IS_PRERENDER = /[?&]prerender/.test(location.search);
 
   /* ---------- утилиты ---------- */
   function esc(s) {
@@ -570,7 +572,7 @@
            preload="metadata" держит вес страницы маленьким до долистывания */
         inner = '<video class="dock__video" muted loop playsinline preload="metadata" ' +
             'aria-label="' + esc(x.alt || 'Ролик сервиса') + '">' +
-            '<source src="' + esc(x.video) + '" type="video/mp4">' +
+            (IS_PRERENDER ? '' : '<source src="' + esc(x.video) + '" type="video/mp4">') +
           '</video>' +
           '<button class="dock__sound" type="button" data-dock-sound aria-label="Включить звук">' +
             ic('mute', { size: 18 }) + '</button>' +
@@ -905,7 +907,7 @@
      Страница при этом не блокируется: сайт можно листать дальше. */
   function renderReelFloat() {
     var r = (S.reelFloat || {});
-    if (!r.video) return '';
+    if (!r.video || IS_PRERENDER) return '';
     return '<div class="reelfloat" data-reelfloat>' +
         '<button class="reelfloat__box" type="button" data-reelfloat-toggle aria-label="Смотреть ролик">' +
           '<video class="reelfloat__video" muted loop playsinline preload="metadata" ' +
@@ -1297,6 +1299,7 @@
           if (!v) return;
           if (i === active && inView && !document.hidden && !PREFERS_STILL.matches) {
             v.muted = !wantSound;
+            if (!v.muted) soundOnce(it, v); else { v.loop = true; v.onended = null; }
             var p = v.play();
             if (p && p.then) {
               p.then(function () {
@@ -1346,6 +1349,22 @@
           if (v && !v.paused) { v.muted = false; syncSound(it); }
         }, { passive: true });
       });
+      /* Со звуком ролик идёт один раз: досмотрели — звук выключается,
+         и дальше он снова крутится тихо, чтобы не надоедать. */
+      function soundOnce(it, v) {
+        v.loop = false;
+        v.onended = function () {
+          v.onended = null;
+          v.loop = true;
+          v.muted = true;
+          wantSound = false;
+          v.currentTime = 0;
+          syncSound(it);
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});
+        };
+      }
+
       function syncSound(it) {
         var v = it.querySelector('video');
         var b = it.querySelector('[data-dock-sound]');
@@ -1388,6 +1407,7 @@
         items.forEach(function (o) { var ov = o.querySelector('video'); if (ov && ov !== v) { ov.muted = true; syncSound(o); } });
         wantSound = v.muted;              /* был тихим — значит человек хочет звук */
         v.muted = !wantSound;
+        if (wantSound) soundOnce(it, v); else { v.loop = true; v.onended = null; }
         syncSound(it);
         if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
       });
