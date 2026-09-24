@@ -571,9 +571,11 @@
       if (x.video) {
         /* muted + playsinline — иначе телефон не даст ролику стартовать сам;
            preload="metadata" держит вес страницы маленьким до долистывания */
-        inner = '<video class="dock__video" muted loop playsinline preload="metadata" ' +
+        /* сам файл подставляется, только когда карточка подъезжает к центру:
+           иначе телефон держит несколько роликов сразу и звук плывёт */
+        inner = '<video class="dock__video" muted loop playsinline preload="none" ' +
+            (IS_PRERENDER ? '' : 'data-src="' + esc(x.video) + '" ') +
             'aria-label="' + esc(x.alt || 'Ролик сервиса') + '">' +
-            (IS_PRERENDER ? '' : '<source src="' + esc(x.video) + '" type="video/mp4">') +
           '</video>' +
           '<button class="dock__sound" type="button" data-dock-sound aria-label="Включить звук">' +
             ic('mute', { size: 18 }) + '</button>' +
@@ -1294,7 +1296,20 @@
          страницы, — поэтому сначала пробуем со звуком, при отказе играем тихо
          и включаем звук на первом же касании. */
       var inView = false, wantSound = true;
+      /* файл подключаем только соседям центра — не больше трёх сразу */
+      function loadNear() {
+        items.forEach(function (it, i) {
+          var v = it.querySelector('video');
+          if (!v || !v.dataset.src) return;
+          if (Math.abs(i - active) <= 1 && !v.src) {
+            v.src = v.dataset.src;
+            v.load();
+          }
+        });
+      }
+
       function playCenter() {
+        loadNear();
         items.forEach(function (it, i) {
           var v = it.querySelector('video');
           if (!v) return;
