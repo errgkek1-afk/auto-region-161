@@ -551,10 +551,11 @@
       '<div class="calc__legend">в месяц / за год</div>' +
       row(R.petrol, r.petrol) +
       row(R.gas, r.gas) +
+      /* крупно — экономия за год, мелкой строкой снизу — за месяц */
       '<div class="calc__save">' +
-        '<span>' + esc(R.save) + '</span>' +
-        '<b>' + fmt(r.save) + ' ₽</b>' +
-        '<i>' + esc(R.saveYear) + ' — ' + fmt(r.save * 12) + ' ₽</i>' +
+        '<span>' + esc(R.saveYear) + '</span>' +
+        '<b>' + fmt(r.save * 12) + ' ₽</b>' +
+        '<i>' + esc(R.save) + ' — ' + fmt(r.save) + ' ₽</i>' +
       '</div>' +
       leadBtn('btn--cta calc__go', c.cta.label, 'калькулятор', 16, calcNote);
   }

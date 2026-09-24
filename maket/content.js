@@ -224,7 +224,7 @@ window.SITE = {
     results: {
       petrol:  'Затраты на бензин',
       gas:     'Затраты на газу',
-      save:    'Экономия, в месяц',
+      save:    'В месяц',
       saveYear: 'Экономия за год',
     },
 
@@ -275,17 +275,17 @@ window.SITE = {
   /* Маленький ролик в углу экрана. Пока заглушка - стоит первый ролик ленты,
      Eugene пришлёт отдельный. Пустой video выключает блок целиком. */
   reelFloat: {
-    video: 'video/reel-1.mp4',
-    poster: 'video/reel-1.jpg',
+    video: 'video/reel-main.mp4',
+    poster: 'video/reel-main.jpg',
     label: 'Смотреть',
   },
 
   gallery: {
     title: 'Работы сервиса',
     items: [
-      { video: 'video/reel-2.mp4', poster: 'video/reel-2.jpg', w: 9, h: 16, cap: 'Настройка ГБО в движении' },
+      { video: 'video/reel-2.mp4', poster: 'video/reel-2.jpg', w: 9, h: 16, cap: 'Установка ГБО в сервисе' },
       { photo: 'img/gallery/g01.jpg', w: 788, h: 1400, cap: 'Haval' },
-      { video: 'video/reel-3.mp4', poster: 'video/reel-3.jpg', w: 9, h: 16, cap: 'Работа мастеров сервиса' },
+      { video: 'video/reel-3.mp4', poster: 'video/reel-3.jpg', w: 9, h: 16, cap: 'Geely Preface' },
       { photo: 'img/gallery/g02.jpg', w: 1400, h: 645, cap: 'Porsche, мотор V8' },
       { video: 'video/reel-1.mp4', poster: 'video/reel-1.jpg', w: 9, h: 16, cap: 'Михаил - настройка ГБО' },
       { photo: 'img/gallery/g03.jpg', w: 1400, h: 1052, cap: 'Subaru с турбомотором' },
@@ -440,7 +440,7 @@ window.SITE = {
   location: {
     lead: 'Мы на левом берегу — вот как нас найти',
     address: '1-я Луговая ул., 15А, микрорайон Заречная',
-    note: 'К нам едут из Тулы и Самары. Из любой точки Ростова — максимум час',
+    note: 'К нам едут из Тулы и Самары.\nИз любой точки Ростова — максимум час',
     hoursLabel: 'График работы',
     hours: 'Вторник–суббота, 10:00–19:00',
     mapImage: 'img/map.jpg',        // статичная карта (OpenStreetMap), кликом открывает Яндекс.Карты

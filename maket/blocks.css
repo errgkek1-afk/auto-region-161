@@ -1297,6 +1297,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
   font-size: var(--fs-body);
   line-height: 1.5;
   color: var(--text);
+  white-space: pre-line;   /* перенос строки из текста в content.js */
 }
 .loc__block b { display: block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
 .loc__hours { margin-top: 6px; font-size: var(--fs-body); color: var(--text-muted); }
