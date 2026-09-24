@@ -900,71 +900,66 @@
       ic('whatsapp', { size: 26 }) + '</a>';
   }
 
-  /* Маленький ролик в углу: играет тихо сам, по нажатию разворачивается
-     на весь экран со звуком. Пока стоит первый ролик ленты — заглушка. */
+  /* Ролик в углу: играет тихо сам. Нажал — разворачивается примерно
+     на 60% высоты экрана прямо на месте, со звуком и с начала.
+     Страница при этом не блокируется: сайт можно листать дальше. */
   function renderReelFloat() {
     var r = (S.reelFloat || {});
     if (!r.video) return '';
     return '<div class="reelfloat" data-reelfloat>' +
-        '<button class="reelfloat__box" type="button" data-reelfloat-open aria-label="Смотреть ролик">' +
+        '<button class="reelfloat__box" type="button" data-reelfloat-toggle aria-label="Смотреть ролик">' +
           '<video class="reelfloat__video" muted loop playsinline preload="metadata" ' +
             'poster="' + esc(r.poster || '') + '"><source src="' + esc(r.video) + '" type="video/mp4"></video>' +
           '<span class="reelfloat__badge">' + ic('play', { size: 14 }) + esc(r.label || 'Смотреть') + '</span>' +
         '</button>' +
         '<button class="reelfloat__close" type="button" data-reelfloat-hide aria-label="Убрать ролик">' +
           ic('close', { size: 14 }) + '</button>' +
-      '</div>' +
-      '<div class="reelbig" id="reel-big" hidden>' +
-        '<div class="reelbig__backdrop" data-reelfloat-close></div>' +
-        '<div class="reelbig__inner">' +
-          '<video class="reelbig__video" controls playsinline preload="metadata" ' +
-            'poster="' + esc(r.poster || '') + '"><source src="' + esc(r.video) + '" type="video/mp4"></video>' +
-          '<button class="reelbig__close" type="button" data-reelfloat-close aria-label="Закрыть">' +
-            ic('close', { size: 20 }) + '</button>' +
-        '</div>' +
       '</div>';
   }
 
   function wireReelFloat() {
     var box = document.querySelector('[data-reelfloat]');
-    var big = document.getElementById('reel-big');
-    if (!box || !big) return;
-    var small = box.querySelector('video');
-    var large = big.querySelector('video');
+    if (!box) return;
+    var v = box.querySelector('video');
+    var big = false;
 
-    function playSmall() {
-      if (document.hidden || PREFERS_STILL.matches || big.hidden === false) return;
-      var p = small.play();
+    function playQuiet() {
+      if (document.hidden || PREFERS_STILL.matches) return;
+      var p = v.play();
       if (p && p.catch) p.catch(function () {});
     }
-    function open() {
-      small.pause();
-      big.hidden = false;
-      document.documentElement.classList.add('is-modal');
-      large.currentTime = small.currentTime || 0;
-      large.muted = false;
-      var p = large.play();
-      if (p && p.catch) p.catch(function () {});
+    function toBig() {
+      big = true;
+      box.classList.add('is-big');
+      v.currentTime = 0;          /* смотрим с начала, а не с середины */
+      v.muted = false;
+      v.controls = true;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { v.muted = true; v.play(); });
     }
-    function close() {
-      large.pause();
-      big.hidden = true;
-      document.documentElement.classList.remove('is-modal');
-      playSmall();
+    function toSmall() {
+      big = false;
+      box.classList.remove('is-big');
+      v.controls = false;
+      v.muted = true;
+      playQuiet();
     }
-    box.querySelector('[data-reelfloat-open]').addEventListener('click', open);
-    box.querySelector('[data-reelfloat-hide]').addEventListener('click', function () {
-      small.pause();
+    box.querySelector('[data-reelfloat-toggle]').addEventListener('click', function (e) {
+      /* в большом виде клики по полосе проигрывателя не должны сворачивать */
+      if (big && e.target.tagName === 'VIDEO') return;
+      big ? toSmall() : toBig();
+    });
+    box.querySelector('[data-reelfloat-hide]').addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (big) { toSmall(); return; }
+      v.pause();
       box.remove();
     });
-    big.querySelectorAll('[data-reelfloat-close]').forEach(function (b) {
-      b.addEventListener('click', close);
-    });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !big.hidden) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && big) toSmall(); });
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { small.pause(); large.pause(); } else if (big.hidden) playSmall();
+      if (document.hidden) v.pause(); else if (!big) playQuiet();
     });
-    playSmall();
+    playQuiet();
   }
 
   /* =====================  СБОРКА  ===================== */
