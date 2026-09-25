@@ -255,7 +255,7 @@
    БЛОК 3 — Настройка ГБО. Три переключаемых подблока.
    Фон чёрный, без кирпича.
    ===================================================================== */
-.tuning { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); }
+.tuning { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); }
 
 .tuning__title {
   font-size: clamp(1.5rem, 2.95vw, 3.4rem);
@@ -329,7 +329,11 @@
   /* Подблоки с фото (не с панелями): вывод и кнопка остаются в левой
      колонке, на уровне с фотографией. Раньше они уходили во всю ширину
      под высокое фото — слева зиял пустой кусок, страница растягивалась. */
-  .panel--shots .panel__foot { grid-column: 1; }
+  .panel--shots .panel__body { grid-column: 1; grid-row: 1; }
+  .panel--shots .panel__foot { grid-column: 1; grid-row: 2; align-self: start; }
+  /* фото занимает обе строки правой колонки: раньше под ним зияла пустая
+     половина экрана, а текст с отзывом жались слева */
+  .panel--shots .panel__media { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
   /* фото стоит по центру своей колонки, не прижимаясь ни к тексту, ни к краю.
      Центрируем саму ленту, а не колонку: justify-self схлопывал колонку
      до ширины содержимого, и кадры сжимались почти в ноль. */
@@ -569,7 +573,7 @@
    БЛОК 4 — Сравнение подходов.
    Слева таблица «как делают все / как делаем мы», справа фото работ.
    ===================================================================== */
-.compare { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.compare { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .compare__title {
   font-size: clamp(1.5rem, 2.95vw, 3.4rem);
@@ -702,7 +706,7 @@
 /* =====================================================================
    БЛОК 5 — Калькулятор, гарантия, состав комплекта
    ===================================================================== */
-.calc { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.calc { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .calc__title {
   font-size: clamp(1.5rem, 2.95vw, 3.4rem);
@@ -981,7 +985,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 @media (max-width: 600px) { .dock { --dock-w: 200px; --dock-h: 340px; gap: 14px; } }
 @media (prefers-reduced-motion: reduce) { .dock__card { transition: none; } }
 
-.team { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.team { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .team__title {
   font-size: clamp(1.5rem, 2.6vw, 2.7rem);
@@ -1052,7 +1056,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 /* =====================================================================
    БЛОК 7 — Отзывы. Оформление под Яндекс.Карты.
    ===================================================================== */
-.reviews { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.reviews { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .reviews__head { display: grid; gap: 20px; }
 @media (min-width: 1000px) {
@@ -1141,7 +1145,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 /* =====================================================================
    БЛОК 8 — Частые вопросы. Открытые карточки вопрос-ответ.
    ===================================================================== */
-.faq { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.faq { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .faq__lead {
   font-size: clamp(1.5rem, 2.6vw, 2.6rem);
@@ -1172,7 +1176,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 /* =====================================================================
    БЛОК 9 — Как доехать
    ===================================================================== */
-.loc { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.loc { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .loc__lead {
   font-size: clamp(1.5rem, 2.6vw, 2.6rem);
@@ -1334,7 +1338,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 /* =====================================================================
    БЛОК 10 — Форма записи. Одна плашка, чуть уже основного экрана.
    ===================================================================== */
-.form { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.form { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .form__card {
   max-width: 1180px;
