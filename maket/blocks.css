@@ -1589,7 +1589,7 @@ html.is-modal { overflow: hidden; }
 .reelfloat.is-big .reelfloat__box { cursor: zoom-out; }
 
 @media (max-width: 600px) {
-  .reelfloat { width: 84px; left: 12px; bottom: 104px; }
+  .reelfloat { width: 74px; left: 8px; bottom: 120px; }
   .reelfloat.is-big { width: min(60vw, calc(58vh * 9 / 16)); bottom: 88px; }
 }
 @media (prefers-reduced-motion: reduce) { .reelfloat { transition: none; } }
