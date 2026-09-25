@@ -255,7 +255,7 @@
    БЛОК 3 — Настройка ГБО. Три переключаемых подблока.
    Фон чёрный, без кирпича.
    ===================================================================== */
-.tuning { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); }
+.tuning { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); }
 
 .tuning__title {
   font-size: clamp(1.5rem, 2.95vw, 3.4rem);
@@ -263,6 +263,10 @@
   text-wrap: balance;
 }
 @media (min-width: 1024px) { .tuning__title { white-space: nowrap; } }
+/* на телефоне заголовок должен ложиться в две строки, а не в три */
+@media (max-width: 600px) {
+  .tuning__title { font-size: clamp(1.15rem, 5.4vw, 1.5rem); line-height: 1.2; text-wrap: pretty; }
+}
 
 /* ---------- плашки-переключатели ---------- */
 .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: clamp(28px, 4vw, 44px); }
@@ -325,7 +329,11 @@
   /* Подблоки с фото (не с панелями): вывод и кнопка остаются в левой
      колонке, на уровне с фотографией. Раньше они уходили во всю ширину
      под высокое фото — слева зиял пустой кусок, страница растягивалась. */
-  .panel--shots .panel__foot { grid-column: 1; }
+  .panel--shots .panel__body { grid-column: 1; grid-row: 1; }
+  .panel--shots .panel__foot { grid-column: 1; grid-row: 2; align-self: start; }
+  /* фото занимает обе строки правой колонки: раньше под ним зияла пустая
+     половина экрана, а текст с отзывом жались слева */
+  .panel--shots .panel__media { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
   /* фото стоит по центру своей колонки, не прижимаясь ни к тексту, ни к краю.
      Центрируем саму ленту, а не колонку: justify-self схлопывал колонку
      до ширины содержимого, и кадры сжимались почти в ноль. */
@@ -565,7 +573,7 @@
    БЛОК 4 — Сравнение подходов.
    Слева таблица «как делают все / как делаем мы», справа фото работ.
    ===================================================================== */
-.compare { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.compare { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .compare__title {
   font-size: clamp(1.5rem, 2.95vw, 3.4rem);
@@ -698,7 +706,7 @@
 /* =====================================================================
    БЛОК 5 — Калькулятор, гарантия, состав комплекта
    ===================================================================== */
-.calc { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.calc { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .calc__title {
   font-size: clamp(1.5rem, 2.95vw, 3.4rem);
@@ -977,7 +985,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 @media (max-width: 600px) { .dock { --dock-w: 200px; --dock-h: 340px; gap: 14px; } }
 @media (prefers-reduced-motion: reduce) { .dock__card { transition: none; } }
 
-.team { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.team { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .team__title {
   font-size: clamp(1.5rem, 2.6vw, 2.7rem);
@@ -1048,7 +1056,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 /* =====================================================================
    БЛОК 7 — Отзывы. Оформление под Яндекс.Карты.
    ===================================================================== */
-.reviews { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.reviews { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .reviews__head { display: grid; gap: 20px; }
 @media (min-width: 1000px) {
@@ -1137,7 +1145,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 /* =====================================================================
    БЛОК 8 — Частые вопросы. Открытые карточки вопрос-ответ.
    ===================================================================== */
-.faq { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.faq { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .faq__lead {
   font-size: clamp(1.5rem, 2.6vw, 2.6rem);
@@ -1168,7 +1176,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 /* =====================================================================
    БЛОК 9 — Как доехать
    ===================================================================== */
-.loc { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.loc { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .loc__lead {
   font-size: clamp(1.5rem, 2.6vw, 2.6rem);
@@ -1293,6 +1301,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
   font-size: var(--fs-body);
   line-height: 1.5;
   color: var(--text);
+  white-space: pre-line;   /* перенос строки из текста в content.js */
 }
 .loc__block b { display: block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
 .loc__hours { margin-top: 6px; font-size: var(--fs-body); color: var(--text-muted); }
@@ -1329,7 +1338,7 @@ a.review:hover .review__foot { color: var(--text-muted); }
 /* =====================================================================
    БЛОК 10 — Форма записи. Одна плашка, чуть уже основного экрана.
    ===================================================================== */
-.form { background: var(--bg); padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+.form { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 
 .form__card {
   max-width: 1180px;
@@ -1511,4 +1520,81 @@ html.is-modal { overflow: hidden; }
 .footer__cookie:hover { color: var(--text-muted); }
 .footer__cookie[hidden] { display: none; }
 
+
+
+/* подпись под карточкой ленты */
+.dock__cap {
+  display: block;
+  margin-top: 10px;
+  max-width: 100%;
+  font-size: var(--fs-xs);
+  line-height: 1.35;
+  color: var(--text-dim);
+  text-align: center;
+  opacity: .55;
+  transition: opacity .2s ease-out, color .2s ease-out;
+}
+.dock__item.is-active .dock__cap { opacity: 1; color: var(--text-muted); }
+
+/* ---------- ролик в углу ---------- */
+.reelfloat {
+  position: fixed;
+  left: 16px; bottom: 16px;
+  z-index: 70;
+  width: 116px;
+  transition: width .28s var(--ease-out, ease-out);
+}
+/* на компьютере он крупнее и стоит справа */
+@media (min-width: 1024px) {
+  .reelfloat { left: auto; right: 24px; bottom: 24px; width: 190px; }
+  .reelfloat.is-big { width: calc(60vh * 9 / 16); }
+}
+.reelfloat__box {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  padding: 0;
+  border: 1px solid rgba(255, 120, 110, .5);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0b0607 center / cover no-repeat;
+  cursor: pointer;
+  /* мягкое свечение по краю, чтобы ролик не терялся на тёмном фоне */
+  box-shadow: 0 0 0 1px rgba(255, 42, 32, .25),
+              0 0 18px rgba(255, 42, 32, .28),
+              0 10px 30px rgba(0, 0, 0, .5);
+  transition: box-shadow .2s ease-out, border-color .2s ease-out;
+}
+.reelfloat__box:hover { border-color: rgba(255, 140, 130, .8); box-shadow: 0 0 0 1px rgba(255,42,32,.35), 0 0 26px rgba(255,42,32,.4), 0 10px 30px rgba(0,0,0,.5); }
+.reelfloat__video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.reelfloat__badge {
+  position: absolute; left: 6px; bottom: 6px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(10, 5, 6, .62);
+  font-size: 11px; color: #fff;
+}
+.reelfloat.is-big .reelfloat__badge { display: none; }
+.reelfloat__close {
+  position: absolute; top: -8px; right: -8px;
+  display: grid; place-items: center;
+  width: 26px; height: 26px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  background: rgba(10,5,6,.92);
+  color: var(--text-muted);
+  cursor: pointer;
+  z-index: 2;
+}
+/* раскрытый вид: занимает около 60% высоты экрана, страница листается дальше */
+.reelfloat.is-big { width: calc(60vh * 9 / 16); max-width: 78vw; }
+.reelfloat.is-big .reelfloat__box { cursor: zoom-out; }
+
+@media (max-width: 600px) {
+  .reelfloat { width: 74px; left: 10px; bottom: 16px; }
+  .reelfloat.is-big { width: min(60vw, calc(58vh * 9 / 16)); bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .reelfloat { transition: none; } }
 

@@ -9,6 +9,8 @@
   var C = window.CFG;
   var ic = window.icon;
   var PREFERS_STILL = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* снимок страницы для поисковиков (prerender.py) — видео туда не грузим */
+  var IS_PRERENDER = /[?&]prerender/.test(location.search);
 
   /* ---------- утилиты ---------- */
   function esc(s) {
@@ -549,10 +551,11 @@
       '<div class="calc__legend">в месяц / за год</div>' +
       row(R.petrol, r.petrol) +
       row(R.gas, r.gas) +
+      /* крупно — экономия за год, мелкой строкой снизу — за месяц */
       '<div class="calc__save">' +
-        '<span>' + esc(R.save) + '</span>' +
-        '<b>' + fmt(r.save) + ' ₽</b>' +
-        '<i>' + esc(R.saveYear) + ' — ' + fmt(r.save * 12) + ' ₽</i>' +
+        '<span>' + esc(R.saveYear) + '</span>' +
+        '<b>' + fmt(r.save * 12) + ' ₽</b>' +
+        '<i>' + esc(R.save) + ' — ' + fmt(r.save) + ' ₽</i>' +
       '</div>' +
       leadBtn('btn--cta calc__go', c.cta.label, 'калькулятор', 16, calcNote);
   }
@@ -568,9 +571,11 @@
       if (x.video) {
         /* muted + playsinline — иначе телефон не даст ролику стартовать сам;
            preload="metadata" держит вес страницы маленьким до долистывания */
-        inner = '<video class="dock__video" muted loop playsinline preload="metadata" ' +
+        /* сам файл подставляется, только когда карточка подъезжает к центру:
+           иначе телефон держит несколько роликов сразу и звук плывёт */
+        inner = '<video class="dock__video" muted loop playsinline preload="none" ' +
+            (IS_PRERENDER ? '' : 'data-src="' + esc(x.video) + '" ') +
             'aria-label="' + esc(x.alt || 'Ролик сервиса') + '">' +
-            '<source src="' + esc(x.video) + '" type="video/mp4">' +
           '</video>' +
           '<button class="dock__sound" type="button" data-dock-sound aria-label="Включить звук">' +
             ic('mute', { size: 18 }) + '</button>' +
@@ -590,6 +595,7 @@
       var ratio = style ? (' style="' + style + '"') : '';
       return '<div class="dock__item' + (x.video ? ' dock__item--video' : '') + '">' +
         '<figure class="dock__card"' + ratio + '>' + inner + '</figure>' +
+        (x.cap ? '<figcaption class="dock__cap">' + esc(x.cap) + '</figcaption>' : '') +
       '</div>';
     }).join('');
     return '<section class="gallery" id="gallery"><div class="wrap">' +
@@ -899,6 +905,68 @@
       ic('whatsapp', { size: 26 }) + '</a>';
   }
 
+  /* Ролик в углу: играет тихо сам. Нажал — разворачивается примерно
+     на 60% высоты экрана прямо на месте, со звуком и с начала.
+     Страница при этом не блокируется: сайт можно листать дальше. */
+  function renderReelFloat() {
+    var r = (S.reelFloat || {});
+    if (!r.video || IS_PRERENDER) return '';
+    return '<div class="reelfloat" data-reelfloat>' +
+        '<button class="reelfloat__box" type="button" data-reelfloat-toggle aria-label="Смотреть ролик">' +
+          '<video class="reelfloat__video" muted loop playsinline preload="metadata" ' +
+            'poster="' + esc(r.poster || '') + '"><source src="' + esc(r.video) + '" type="video/mp4"></video>' +
+          '<span class="reelfloat__badge">' + ic('play', { size: 14 }) + esc(r.label || 'Смотреть') + '</span>' +
+        '</button>' +
+        '<button class="reelfloat__close" type="button" data-reelfloat-hide aria-label="Убрать ролик">' +
+          ic('close', { size: 14 }) + '</button>' +
+      '</div>';
+  }
+
+  function wireReelFloat() {
+    var box = document.querySelector('[data-reelfloat]');
+    if (!box) return;
+    var v = box.querySelector('video');
+    var big = false;
+
+    function playQuiet() {
+      if (document.hidden || PREFERS_STILL.matches) return;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    }
+    function toBig() {
+      big = true;
+      box.classList.add('is-big');
+      v.currentTime = 0;          /* смотрим с начала, а не с середины */
+      v.muted = false;
+      v.controls = true;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { v.muted = true; v.play(); });
+    }
+    function toSmall() {
+      big = false;
+      box.classList.remove('is-big');
+      v.controls = false;
+      v.muted = true;
+      playQuiet();
+    }
+    box.querySelector('[data-reelfloat-toggle]').addEventListener('click', function (e) {
+      /* в большом виде клики по полосе проигрывателя не должны сворачивать */
+      if (big && e.target.tagName === 'VIDEO') return;
+      big ? toSmall() : toBig();
+    });
+    box.querySelector('[data-reelfloat-hide]').addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (big) { toSmall(); return; }
+      v.pause();
+      box.remove();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && big) toSmall(); });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) v.pause(); else if (!big) playQuiet();
+    });
+    playQuiet();
+  }
+
   /* =====================  СБОРКА  ===================== */
   function build() {
     document.title = S.meta.title;
@@ -907,10 +975,11 @@
 
     document.getElementById('app').innerHTML =
       renderHeader() +
-      '<main>' + renderHero() + renderClients() + renderTuning() + renderCompare() + renderCalc() + renderGallery() + renderTeam() + renderReviews() + renderFaq() + renderLocation() + renderForm() + '</main>' +
+      '<main>' + renderHero() + renderClients() + renderTuning() + renderGallery() + renderCompare() + renderCalc() + renderTeam() + renderReviews() + renderFaq() + renderLocation() + renderForm() + '</main>' +
       renderFooter() +
       renderLeadModal() +
-      renderWaFloat();
+      renderWaFloat() +
+      renderReelFloat();
 
     if (!C.contacts.phone) {
       console.warn('[config] Не задан contacts.phone — кнопки мессенджеров пока не ведут никуда.');
@@ -928,6 +997,7 @@
     wireAccordions();
     wireCarousels();
     wireDock();
+    wireReelFloat();
     wireTerms();
     wireImageFade();
     wireConsent();
@@ -1226,12 +1296,26 @@
          страницы, — поэтому сначала пробуем со звуком, при отказе играем тихо
          и включаем звук на первом же касании. */
       var inView = false, wantSound = true;
+      /* файл подключаем только соседям центра — не больше трёх сразу */
+      function loadNear() {
+        items.forEach(function (it, i) {
+          var v = it.querySelector('video');
+          if (!v || !v.dataset.src) return;
+          if (Math.abs(i - active) <= 1 && !v.src) {
+            v.src = v.dataset.src;
+            v.load();
+          }
+        });
+      }
+
       function playCenter() {
+        loadNear();
         items.forEach(function (it, i) {
           var v = it.querySelector('video');
           if (!v) return;
           if (i === active && inView && !document.hidden && !PREFERS_STILL.matches) {
             v.muted = !wantSound;
+            if (!v.muted) soundOnce(it, v); else { v.loop = true; v.onended = null; }
             var p = v.play();
             if (p && p.then) {
               p.then(function () {
@@ -1281,6 +1365,22 @@
           if (v && !v.paused) { v.muted = false; syncSound(it); }
         }, { passive: true });
       });
+      /* Со звуком ролик идёт один раз: досмотрели — звук выключается,
+         и дальше он снова крутится тихо, чтобы не надоедать. */
+      function soundOnce(it, v) {
+        v.loop = false;
+        v.onended = function () {
+          v.onended = null;
+          v.loop = true;
+          v.muted = true;
+          wantSound = false;
+          v.currentTime = 0;
+          syncSound(it);
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});
+        };
+      }
+
       function syncSound(it) {
         var v = it.querySelector('video');
         var b = it.querySelector('[data-dock-sound]');
@@ -1323,6 +1423,7 @@
         items.forEach(function (o) { var ov = o.querySelector('video'); if (ov && ov !== v) { ov.muted = true; syncSound(o); } });
         wantSound = v.muted;              /* был тихим — значит человек хочет звук */
         v.muted = !wantSound;
+        if (wantSound) soundOnce(it, v); else { v.loop = true; v.onended = null; }
         syncSound(it);
         if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
       });
