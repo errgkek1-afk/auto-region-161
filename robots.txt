@@ -1,4 +1,2 @@
 User-agent: *
-Allow: /
-
-Sitemap: https://errgkek1-afk.github.io/auto-region-161/sitemap.xml
+Disallow: /
