@@ -593,10 +593,12 @@
          до запуска карточка выглядела чёрной */
       if (x.poster) style += "background-image:url('" + esc(x.poster) + "');";
       var ratio = style ? (' style="' + style + '"') : '';
-      return '<div class="dock__item' + (x.video ? ' dock__item--video' : '') + '">' +
-        '<figure class="dock__card"' + ratio + '>' + inner + '</figure>' +
+      /* figure снаружи, подпись внутри него: иначе figcaption стоит вне figure
+         и разметка становится неверной — поисковик не связывает подпись с кадром */
+      return '<figure class="dock__item' + (x.video ? ' dock__item--video' : '') + '">' +
+        '<div class="dock__card"' + ratio + '>' + inner + '</div>' +
         (x.cap ? '<figcaption class="dock__cap">' + esc(x.cap) + '</figcaption>' : '') +
-      '</div>';
+      '</figure>';
     }).join('');
     return '<section class="gallery" id="gallery"><div class="wrap">' +
       (g.title ? '<h2 class="gallery__title">' + accent(g.title) + '</h2>' : '') +
@@ -797,9 +799,9 @@
     };
     return '<form class="lead" data-lead-form="' + key + '" novalidate>' +
       '<label class="lead__field"><span>' + esc(f.nameLabel) + ' <i>— необязательно</i></span>' +
-        '<input type="text" name="name" autocomplete="name" maxlength="60" placeholder="' + esc(f.nameHint) + '"></label>' +
+        '<input class="ym-disable-keys" type="text" name="name" autocomplete="name" maxlength="60" placeholder="' + esc(f.nameHint) + '"></label>' +
       '<label class="lead__field"><span>' + esc(f.phoneLabel) + ' <i class="lead__req">*</i></span>' +
-        '<input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required></label>' +
+        '<input class="ym-disable-keys" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required></label>' +
       '<em class="lead__err" data-err="phone" hidden>' + esc(f.errPhone) + '</em>' +
       '<label class="lead__check"><input type="checkbox" name="pd" required><span>' + linked(f.consentPd) + '</span></label>' +
       '<em class="lead__err" data-err="pd" hidden>' + esc(f.errPd) + '</em>' +
@@ -812,9 +814,10 @@
           '<span class="lead__tick">' + ic('check', { size: 26 }) + '</span>' +
         '</button>' +
       '</div>' +
-      '<em class="lead__err" data-err="send" hidden>' + esc(f.errSend) + '</em>' +
       '<div class="lead__after" hidden>' +
-        '<a class="btn lead__wa" data-lead-wa href="#" target="_blank" rel="noopener">' +
+        /* сразу рабочая ссылка, а не заглушка: если человек нажмёт до того,
+           как сработает скрипт, он всё равно попадёт в WhatsApp */
+        '<a class="btn lead__wa" data-lead-wa href="' + esc(waLink(f.doneWa)) + '" target="_blank" rel="noopener">' +
           ic('whatsapp', { size: 18 }) + esc(f.waLabel) + '</a>' +
       '</div>' +
     '</form>';
@@ -1515,8 +1518,8 @@
 
   /* ---------- cookie и Яндекс Метрика ----------
      Код счётчика стоит в <head> (window.arMetrika) и работает сразу —
-     кроме тех, кто нажал «Отклонить». Здесь — уведомление с выбором
-     («Понятно» / «Отклонить» / «Настроить») и цели для Метрики:
+     кроме тех, кто отказался от аналитики. Здесь — уведомление с выбором
+     («Понятно» / «Настроить») и цели для Метрики:
      whatsapp, phone — нажатия на кнопки связи, lead — отправленная заявка. */
   function wireConsent() {
     var id = Number(String((C.metrika && C.metrika.id) || '').replace(/\D/g, ''));
@@ -1554,7 +1557,8 @@
               'и Яндекс Метрики. <a href="consent.html">Подробнее</a></p>' +
             '<div class="cookie__actions">' +
               '<button type="button" class="btn btn--sm btn--cta" data-act="all">Понятно</button>' +
-              '<button type="button" class="btn btn--sm cookie__ghost" data-act="none">Отклонить</button>' +
+              /* отдельной кнопки «Отклонить» нет: отказ живёт в «Настроить» —
+                 снять галочку аналитики и сохранить */
               '<button type="button" class="cookie__link" data-act="settings">Настроить</button>' +
             '</div>' +
           '</div>' +
@@ -1576,7 +1580,6 @@
           var act = b.dataset.act;
           if (act === 'settings') { show(true); return; }
           if (act === 'all') apply(true);
-          else if (act === 'none') apply(false);
           else if (act === 'save') apply(bar.querySelector('[data-opt=analytics]').checked);
         });
       }
@@ -1670,6 +1673,30 @@
       return d.slice(0, 11);
     };
 
+    /* Фоновая отправка заявки.
+       keepalive — чтобы запрос долетел, даже если человек в ту же секунду закрыл
+       вкладку или ушёл в WhatsApp.
+       Один повтор через полторы секунды: у заявки есть свой номер, поэтому
+       повторный запрос сервер отбросит, а не заведёт вторую такую же заявку. */
+    function sendLead(lead, triesLeft) {
+      var url = C.leads && C.leads.endpoint;
+      if (!url) {
+        console.warn('[leads] Не задан адрес для заявок (config.js → leads.endpoint) — заявка не сохранена.', lead);
+        return;
+      }
+      if (triesLeft == null) triesLeft = 1;
+      var again = function () {
+        if (triesLeft > 0) setTimeout(function () { sendLead(lead, triesLeft - 1); }, 1500);
+      };
+      /* text/plain — «простой» запрос: браузер не шлёт лишнюю предварительную проверку */
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(lead),
+        keepalive: true,
+      }).then(function (r) { if (!r.ok) again(); }).catch(again);
+    }
+
     document.querySelectorAll('[data-lead-form]').forEach(function (form) {
       var inModal = modal.contains(form);
       var phone = form.elements.phone;
@@ -1695,12 +1722,12 @@
         if (form.classList.contains('is-sent') || btn.disabled) return;
         if (!ready()) { err('phone', true); phone.focus(); return; }
         if (!form.elements.pd.checked) { err('pd', true); return; }
-        err('send', false);
 
         var name = form.elements.name.value.trim();
         var source = inModal ? (lastSource || 'окно') : form.dataset.leadForm;
         var note = inModal ? lastNote : '';
         var lead = {
+          id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
           name: name,
           phone: '+' + digits(phone.value),
           pdConsent: true,
@@ -1728,24 +1755,11 @@
           }
         };
 
-        var url = C.leads && C.leads.endpoint;
-        if (!url) {
-          console.warn('[leads] Не задан адрес для заявок (config.js → leads.endpoint) — заявка не сохранена.', lead);
-          finish();
-          return;
-        }
-        /* text/plain — «простой» запрос: браузер не шлёт лишнюю предварительную проверку */
-        fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-          body: JSON.stringify(lead),
-        }).then(function (r) {
-          if (!r.ok) throw new Error(r.status);
-          finish();
-        }).catch(function () {
-          err('send', true);
-          btn.disabled = false;
-        });
+        /* «Спасибо» показываем сразу, не дожидаясь сети: человек нажал — для него
+           всё готово. Отправка уходит в фон, её задержки и сбои остаются нашей
+           заботой и на экране никак не отражаются. */
+        finish();
+        sendLead(lead);
       });
     });
   }

@@ -276,18 +276,18 @@ window.SITE = {
      Eugene пришлёт отдельный. Пустой video выключает блок целиком. */
   reelFloat: {
     video: 'video/reel-main.mp4',
-    poster: 'video/reel-main.jpg',
+    poster: 'video/reel-main.webp',
     label: 'Смотреть',
   },
 
   gallery: {
     title: 'Работы сервиса',
     items: [
-      { video: 'video/reel-2.mp4', poster: 'video/reel-2.jpg', w: 9, h: 16, cap: 'Установка ГБО в сервисе' },
+      { video: 'video/reel-2.mp4', poster: 'video/reel-2.webp', w: 9, h: 16, cap: 'Установка ГБО в сервисе' },
       { photo: 'img/gallery/g01.jpg', w: 788, h: 1400, cap: 'Haval' },
-      { video: 'video/reel-3.mp4', poster: 'video/reel-3.jpg', w: 9, h: 16, cap: 'Geely Preface' },
+      { video: 'video/reel-3.mp4', poster: 'video/reel-3.webp', w: 9, h: 16, cap: 'Geely Preface' },
       { photo: 'img/gallery/g02.jpg', w: 1400, h: 645, cap: 'Porsche, мотор V8' },
-      { video: 'video/reel-1.mp4', poster: 'video/reel-1.jpg', w: 9, h: 16, cap: 'Михаил - настройка ГБО' },
+      { video: 'video/reel-1.mp4', poster: 'video/reel-1.webp', w: 9, h: 16, cap: 'Михаил - настройка ГБО' },
       { photo: 'img/gallery/g03.jpg', w: 1400, h: 1052, cap: 'Subaru с турбомотором' },
       { photo: 'img/gallery/g04.jpg', w: 1400, h: 642, cap: 'Система ГБО' },
       { photo: 'img/gallery/g05.jpg', w: 952, h: 1400, cap: 'Audi, мотор V6 3.2' },
@@ -315,23 +315,23 @@ window.SITE = {
   },
 
   team: {
-    title: 'Сервису три года. У четырёх мастеров — {36 лет опыта в ГБО} на всех',
+    title: 'Сервису три года. У четырёх мастеров — {42 года опыта} на всех',
     /* Имена и стаж — со слов заказчика. */
     /* Цитаты — черновые, написаны под роль каждого. Заказчик правит или
        заменяет своими: они подписаны реальными людьми. */
     people: [
-      { name: 'Михаил', role: 'Владелец', years: '11 лет опыта в настройке ГБО',
+      { name: 'Михаил', role: 'Владелец', years: '15 лет опыта в работе автосервисных предприятий',
         quote: 'Газ поставить может любой. Мы отвечаем за то, как машина едет после.',
         photo: 'img/team/1-mihail.jpg', photoNeed: 'Михаил, владелец сервиса', w: 720, h: 1200 },
-      { name: 'Михаил', role: 'Специалист по прямому впрыску', years: '11 лет опыта',
+      { name: 'Михаил', role: 'Специалист по прямому впрыску', years: '15 лет опыта в настройке и ремонте ГБО',
         quote: 'Пока сам не проеду на машине — не отдам. За столом настройку не видно.',
         photo: 'img/team/2-diagnost.jpg', photoNeed: 'Михаил, специалист по прямому впрыску', w: 720, h: 1200 },
       { name: 'Лука', role: 'Диагност-настройщик', years: '8 лет опыта',
         quote: 'Если готового решения под машину нет — сделаем своё.',
         photo: 'img/team/3-nestandart.jpg', photoNeed: 'Лука, диагност-настройщик', w: 991, h: 1200 },
-      { name: 'Дмитрий', role: 'Специалист по распределённому впрыску', years: '6 лет опыта',
-        quote: 'Обычная машина — это не проще. Это просто чаще.',
-        photo: 'img/team/4-raspred.jpg', photoNeed: 'Дмитрий, специалист по распределённому впрыску', w: 776, h: 1200 },
+      { name: 'Андрей', role: 'Установщик ГБО', years: '4 года опыта',
+        quote: 'Под капотом должно быть аккуратно. Это видно сразу — и видно через год.',
+        photo: 'img/team/4-andrey.jpg', photoNeed: 'Андрей, установщик ГБО', w: 722, h: 1002 },
     ],
 
     notTitle: 'Чего мы не делаем',
@@ -480,7 +480,6 @@ window.SITE = {
     consentAds: 'Согласен получать [[рекламные и информационные сообщения|consent-ads.html]] — по желанию',
     errPhone:   'Введите номер телефона — 11 цифр',
     errPd:      'Отметьте согласие на обработку персональных данных',
-    errSend:    'Заявка не отправилась. Напишите нам в WhatsApp — ответим так же быстро.',
     doneWa:     'Здравствуйте! Я оставил заявку на сайте, хочу узнать про установку ГБО.',
   },
 

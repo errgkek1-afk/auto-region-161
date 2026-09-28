@@ -294,7 +294,11 @@ a[data-no-phone] { cursor: default; }
   box-shadow: 0 8px 26px rgba(0,0,0,.5);
   transition: background-color .18s ease, transform .18s ease;
 }
-.wa-float:hover { background: var(--wa-hover); transform: scale(1.05); }
+/* наведение только там, где есть мышь: на телефоне после тапа кнопка
+   оставалась увеличенной, пока человек не ткнёт в другое место */
+@media (hover: hover) and (pointer: fine) {
+  .wa-float:hover { background: var(--wa-hover); transform: scale(1.05); }
+}
 @media (min-width: 900px) { .wa-float { display: none; } }
 
 .text-accent { color: var(--accent-hot); }

@@ -307,8 +307,10 @@
 }
 .tuning__arrow svg { stroke-width: 1.5; }
 .tuning__arrow:hover { opacity: 1; color: var(--text); }
-.tuning__arrow--prev:hover { transform: translateX(-3px); }
-.tuning__arrow--next:hover { transform: translateX(3px); }
+@media (hover: hover) and (pointer: fine) {
+  .tuning__arrow--prev:hover { transform: translateX(-3px); }
+  .tuning__arrow--next:hover { transform: translateX(3px); }
+}
 .tuning__arrow--prev { left: calc(-1 * var(--pad) + 4px); }
 .tuning__arrow--next { right: calc(-1 * var(--pad) + 4px); }
 @media (min-width: 1320px) { .tuning__arrow { display: grid; } }
@@ -567,7 +569,9 @@
 .panel__review.is-link { display: block; transition: border-color .2s, background-color .2s; }
 .panel__review.is-link:hover { border-color: var(--text-dim); background: #1b1214; }
 .review__go { margin-left: auto; color: var(--text-dim); transition: color .2s, transform .2s; }
-.panel__review.is-link:hover .review__go { color: var(--text); transform: translateX(3px); }
+@media (hover: hover) and (pointer: fine) {
+  .panel__review.is-link:hover .review__go { color: var(--text); transform: translateX(3px); }
+}
 
 /* =====================================================================
    БЛОК 4 — Сравнение подходов.
@@ -1092,7 +1096,9 @@ a.rating:active { transform: scale(.98); }
 .rating__counts { display: block; margin-top: 5px; font-size: var(--fs-xs); color: var(--text-dim); }
 .rating__src { display: block; margin-top: 2px; font-size: var(--fs-xs); color: var(--text-muted); }
 .rating__go { margin-left: 4px; color: var(--text-dim); transition: color .2s, transform .2s; }
-a.rating:hover .rating__go { color: var(--text); transform: translateX(3px); }
+@media (hover: hover) and (pointer: fine) {
+  a.rating:hover .rating__go { color: var(--text); transform: translateX(3px); }
+}
 
 /* сетка отзывов */
 .reviews__grid { display: grid; gap: 16px; margin-top: clamp(26px, 3.5vw, 40px); }
@@ -1581,12 +1587,19 @@ html.is-modal { overflow: hidden; }
   position: absolute; top: -8px; right: -8px;
   display: grid; place-items: center;
   width: 26px; height: 26px;
+  /* сам кружок маленький, но палец должен попадать: невидимая зона вокруг
+     до 44 px, иначе человек вместо крестика включает звук ролика */
+  -webkit-tap-highlight-color: transparent;
   border: 1px solid rgba(255,255,255,.18);
   border-radius: 50%;
   background: rgba(10,5,6,.92);
   color: var(--text-muted);
   cursor: pointer;
   z-index: 2;
+}
+.reelfloat__close::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 44px; height: 44px; transform: translate(-50%, -50%);
 }
 /* раскрытый вид: занимает около 60% высоты экрана, страница листается дальше */
 .reelfloat.is-big { width: calc(60vh * 9 / 16); max-width: 78vw; }

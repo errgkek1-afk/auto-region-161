@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+# черновой макет — рабочая копия для показа, в поиске ей делать нечего
+Disallow: /maket/
 
-Sitemap: https://errgkek1-afk.github.io/auto-region-161/sitemap.xml
+Sitemap: https://lab-gbo.ru/sitemap.xml

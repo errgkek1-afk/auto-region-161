@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0708">
+  <title>Страница не найдена — АвтоРегион 161</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts.css">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/base.css">
+  <style>
+    /* Страница на один экран: логотип, короткое объяснение, две кнопки.
+       Ничего лишнего — человек сюда попал по ошибке и должен быстро уйти
+       туда, куда шёл. */
+    .nf { min-height: 100svh; display: grid; place-items: center; padding: 32px 16px; text-align: center; }
+    .nf__in { display: grid; gap: 20px; justify-items: center; max-width: 520px; }
+    .nf__logo img { width: 190px; height: auto; }
+    .nf__code { font-size: var(--fs-sm); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+    .nf__title { font-size: clamp(24px, 6vw, 34px); line-height: 1.15; }
+    .nf__text { color: var(--text-muted); }
+    .nf__btns { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  </style>
+</head>
+<body>
+  <main class="nf">
+    <div class="nf__in">
+      <a class="nf__logo" href="/" aria-label="АвтоРегион 161 — на главную">
+        <picture>
+          <source type="image/webp" srcset="/img/logo.webp 320w, /img/logo@2x.webp 640w" sizes="190px">
+          <img src="/img/logo.png" alt="АвтоРегион 161" width="1673" height="840">
+        </picture>
+      </a>
+      <p class="nf__code">Ошибка 404</p>
+      <h1 class="nf__title">Такой страницы у нас нет</h1>
+      <p class="nf__text">Возможно, ссылка устарела или в адресе опечатка. Установка и настройка ГБО, расчёт стоимости и запись — на главной странице.</p>
+      <div class="nf__btns">
+        <a class="btn btn--cta" href="/">На главную</a>
+        <a class="btn btn--soft" href="tel:+79014560825">Позвонить: +7 (901) 456-08-25</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
