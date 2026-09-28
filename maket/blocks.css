@@ -912,7 +912,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
    Лента фото «как док» — между гарантией и мастерами.
    Карточка в центре яркая и приподнята, соседние тусклее и мельче.
    ===================================================================== */
-.gallery { background: var(--bg); padding-block: clamp(48px, 6vw, 80px) clamp(32px, 4vw, 56px); border-top: 1px solid var(--line); }
+.gallery { background: var(--bg); padding-block: clamp(44px, 5.6vw, 76px); border-top: 1px solid var(--line); }
 .gallery__title {
   font-size: clamp(1.5rem, 2.6vw, 2.7rem);
   letter-spacing: -0.035em;
