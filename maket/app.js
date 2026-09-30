@@ -29,7 +29,9 @@
   }
   function tgLink() { return C.contacts.telegram ? 'https://t.me/' + C.contacts.telegram : '#'; }
   function maxLink() { return C.contacts.max || '#'; }
-  /* Кнопка записи: открывает окно заявки. source — откуда нажали (видно в заявке). */
+  /* Кнопка записи: открывает окно заявки. source — откуда нажали (видно в заявке,
+     столбец «Откуда»). У кнопок блока 3 и отзывов вместо места стоит их topic из
+     content.js: место они и так выдают, а тема показывает, какая именно кнопка сработала. */
   function leadBtn(cls, label, source, arrow, note) {
     return '<a class="btn ' + cls + '" href="#zapis" data-lead="' + esc(source) + '"' +
       (note ? ' data-lead-note="' + esc(note) + '"' : '') + '>' +
@@ -54,8 +56,11 @@
      Без модальных окон и библиотек — ТЗ §3.3. */
   function term(html) {
     return html.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, function (_, word, tip) {
+      /* Пробел между словом и расшифровкой: без него робот, читающий текст без
+         стилей, склеивает их в одно слово («ТНВДТопливный»). Глазу он не виден -
+         подсказка выведена из строки (position: absolute), пробел перед ней схлопывается. */
       return '<button class="term" type="button" aria-expanded="false">' +
-        word + '<span class="term__tip" role="tooltip">' + tip + '</span></button>';
+        word + ' <span class="term__tip" role="tooltip">' + tip + '</span></button>';
     });
   }
 
@@ -272,7 +277,7 @@
       '<div class="wrap hero__inner">' +
 
         '<div class="hero__text">' +
-          '<h1 class="hero__title">' + esc(h.title) +
+          '<h1 class="hero__title" data-reveal>' + esc(h.title) +
             '<span class="hero__engines">' + esc(h.engines) + '</span>' +
           '</h1>' +
           '<p class="hero__term roll" id="hero-term" aria-live="polite">' +
@@ -280,9 +285,9 @@
           '<ul class="hero__hooks">' + hooks + '</ul>' +
           '<div class="hero__actions">' +
             leadBtn('btn--cta', h.cta, 'первый экран', 18) +
-            '<p class="hero__counter">' +
-              '<b id="hero-counter">' + fmt(installCount()) + '</b>' +
-              '<span>' + esc(h.counterLabel) + '</span>' +
+            '<p class="hero__counter" data-count>' +
+              '<b id="hero-counter" data-count-num>' + fmt(installCount()) + '</b>' +
+              '<span data-count-text>' + esc(h.counterLabel) + '</span>' +
             '</p>' +
           '</div>' +
         '</div>' +
@@ -362,7 +367,7 @@
       '</' + revTag + '>' : '';
 
     var ctas = b.ctas.map(function (x) {
-      return leadBtn('btn--cta', x.label, 'блок «' + b.tab + '»', 16);
+      return leadBtn('btn--cta', x.label, x.topic || 'блок «' + b.tab + '»', 16);
     }).join('');
 
     /* Строка-вывод и сноска лежат отдельно от колонки — во всю ширину,
@@ -387,8 +392,13 @@
       : '';
 
     var hasShots = !!(b.shots && b.shots.length);
+    /* Панелей на странице три, и текст у всех лежит в разметке - его читает поисковик.
+       Открытая помечена is-active; остальные прячет правило .js-tabs из blocks.css, но
+       только после того, как wireTuning подтвердил, что вкладки работают. id у панелей
+       нет намеренно: tuning-<ключ> уже занят кнопками вкладок, вышли бы двойники. */
     return '<div class="panel' + (cards ? ' panel--cards' : '') +
-      (hasShots ? ' panel--shots' : '') + '" data-panel="' + esc(b.key) + '">' +
+      (hasShots ? ' panel--shots' : '') + (i === 0 ? ' is-active' : '') +
+      '" data-panel="' + esc(b.key) + '">' +
       body +
       cards +
       '<div class="panel__media">' +
@@ -408,11 +418,11 @@
     }).join('');
 
     return '<section class="tuning" id="tuning"><div class="wrap">' +
-      '<h2 class="tuning__title">' + accent(t.title) + '</h2>' +
+      '<h2 class="tuning__title" data-reveal>' + accent(t.title) + '</h2>' +
       '<div class="tabs" role="tablist">' + tabs + '</div>' +
       '<div class="tuning__stage">' +
         '<button class="tuning__arrow tuning__arrow--prev" id="tuning-prev" aria-label="Предыдущий">' + ic('chevronL', { size: 30 }) + '</button>' +
-        '<div id="tuning-panel">' + panelHtml(0) + '</div>' +
+        '<div id="tuning-panel">' + t.subblocks.map(function (b, i) { return panelHtml(i); }).join('') + '</div>' +
         '<button class="tuning__arrow tuning__arrow--next" id="tuning-next" aria-label="Следующий">' + ic('chevronR', { size: 30 }) + '</button>' +
       '</div>' +
     '</div></section>';
@@ -436,7 +446,7 @@
     }).join('');
 
     return '<section class="compare" id="compare"><div class="wrap">' +
-      '<h2 class="compare__title">' + accent(c.title) + '</h2>' +
+      '<h2 class="compare__title" data-reveal>' + accent(c.title) + '</h2>' +
       (c.sub ? '<p class="compare__sub">' + esc(c.sub) + '</p>' : '') +
       '<div class="compare__grid">' +
         '<div class="compare__table">' +
@@ -479,6 +489,7 @@
               (it.t ? ' — ' + esc(it.t) : '') + '</span></li>';
           }).join('') + '</ul>'
         : '<p class="acc__text">' + esc(a.text) + '</p>';
+      if (a.price) body += '<p class="acc__price">' + esc(a.price) + '</p>';
       return '<div class="acc__item" data-acc="' + i + '">' +
         '<button class="acc__head" aria-expanded="false">' + esc(a.title) + ic('chevronDown', { size: 18 }) + '</button>' +
         '<div class="acc__panel"><div class="acc__inner">' + body +
@@ -488,15 +499,15 @@
     }).join('');
 
     var cards = w.cards.map(function (x) {
-      return '<div class="warranty__card' + (x.good ? ' is-good' : '') + '">' +
-        '<span class="warranty__type">' + esc(x.type) + '</span>' +
-        '<span class="warranty__km">' + esc(x.km) + '</span>' +
+      return '<div class="warranty__card' + (x.good ? ' is-good' : '') + '" data-count>' +
+        '<span class="warranty__type" data-count-text>' + esc(x.type) + '</span>' +
+        '<span class="warranty__km" data-count-num>' + esc(x.km) + '</span>' +
         '<span class="warranty__or">' + esc(x.or) + '</span>' +
       '</div>';
     }).join('');
 
     return '<section class="calc" id="calc"><div class="wrap">' +
-      '<h2 class="calc__title">' + esc(c.title) + '</h2>' +
+      '<h2 class="calc__title" data-reveal>' + esc(c.title) + '</h2>' +
 
       '<div class="calc__grid">' +
         '<div class="calc__inputs">' +
@@ -515,6 +526,7 @@
 
       '<div class="warranty">' +
         '<h3 class="warranty__title">' + esc(w.title) + '</h3>' +
+        (w.first ? '<p class="warranty__first">' + ic('check', { size: 17 }) + esc(w.first) + '</p>' : '') +
         '<div class="warranty__cards">' + cards + '</div>' +
         (w.note ? '<p class="warranty__note">' + esc(w.note) + '</p>' : '') +
       '</div>' +
@@ -557,7 +569,31 @@
         '<b>' + fmt(r.save * 12) + ' ₽</b>' +
         '<i>' + esc(R.save) + ' — ' + fmt(r.save) + ' ₽</i>' +
       '</div>' +
-      leadBtn('btn--cta calc__go', c.cta.label, 'калькулятор', 16, calcNote);
+      /* Срок возврата денег: цена «от» делится на экономию этого человека.
+         Без него калькулятор обрывается на полумысли - видно выгоду, но не
+         видно, когда она перекроет установку. Решение Eugene 30.09. */
+      paybackHtml(r) +
+      leadBtn('btn--cta calc__go', c.cta.label, 'калькулятор', 16, calcNote) +
+      (c.installment ? '<p class="calc__installment">' + esc(c.installment) + '</p>' : '');
+  }
+
+  function paybackHtml(r) {
+    var c = S.calc, cena = C.calc.PRICE_FROM;
+    if (!c.results.payback || !cena || r.save <= 0) return '';
+    var mes = Math.ceil(cena / r.save);
+    if (mes > 60) return '';                     /* дольше пяти лет - не показываем */
+    return '<div class="calc__payback">' +
+      '<span>' + esc(c.results.payback) + '</span>' +
+      '<b>' + mes + ' ' + sklonenie(mes, ['месяц', 'месяца', 'месяцев']) + '</b>' +
+    '</div>';
+  }
+
+  /* 1 месяц, 2 месяца, 5 месяцев */
+  function sklonenie(n, formy) {
+    var n10 = n % 10, n100 = n % 100;
+    if (n10 === 1 && n100 !== 11) return formy[0];
+    if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return formy[1];
+    return formy[2];
   }
 
   /* =====================  БЛОК 6 — Мастера  ===================== */
@@ -581,7 +617,10 @@
             ic('mute', { size: 18 }) + '</button>' +
           '<span class="dock__play" aria-hidden="true">' + ic('play', { size: 26 }) + '</span>';
       } else if (x.photo) {
-        inner = pic(x.photo, x.alt || 'Работа сервиса', x.w, x.h);
+        /* невидимое описание для поисковика: подпись + приписка про услугу и город
+           (content.js → gallery.altSuffix). Видимая подпись остаётся как есть; своё alt
+           у карточки перебивает формулу - так разведены два фото с одной подписью */
+        inner = pic(x.photo, x.alt || (x.cap ? x.cap + g.altSuffix : 'Работа сервиса'), x.w, x.h);
       } else {
         stub += 1;
         inner = '<div class="photo-stub"><span class="photo-stub__tag">Фото ' + stub + '</span></div>';
@@ -601,7 +640,7 @@
       '</figure>';
     }).join('');
     return '<section class="gallery" id="gallery"><div class="wrap">' +
-      (g.title ? '<h2 class="gallery__title">' + accent(g.title) + '</h2>' : '') +
+      (g.title ? '<h2 class="gallery__title" data-reveal>' + accent(g.title) + '</h2>' : '') +
     '</div>' +
     '<div class="dock" data-dock>' + items + '</div>' +
     '</section>';
@@ -642,7 +681,7 @@
     }).join('');
 
     return '<section class="team" id="team"><div class="wrap">' +
-      '<h2 class="team__title">' + accent(t.title) + '</h2>' +
+      '<h2 class="team__title" data-reveal>' + accent(t.title) + '</h2>' +
       '<div class="team__grid">' + people + '</div>' +
       '<div class="not">' +
         '<h3 class="not__title">' + esc(t.notTitle) + '</h3>' +
@@ -694,12 +733,12 @@
     }).join('');
 
     var buttons = r.cta.buttons.map(function (b) {
-      return leadBtn('btn--cta', b.label, 'отзывы', 16);
+      return leadBtn('btn--cta', b.label, b.topic || 'отзывы', 16);
     }).join('');
 
     return '<section class="reviews" id="reviews"><div class="wrap">' +
       '<div class="reviews__head">' +
-        '<h2 class="reviews__lead">' + esc(r.lead) + '</h2>' +
+        '<h2 class="reviews__lead" data-reveal>' + esc(r.lead) + '</h2>' +
         ratings +
       '</div>' +
       '<div class="reviews__grid">' + items + '</div>' +
@@ -728,7 +767,7 @@
     }).join('');
 
     return '<section class="faq" id="faq"><div class="wrap">' +
-      '<h2 class="faq__lead">' + esc(f.lead) + '</h2>' +
+      '<h2 class="faq__lead" data-reveal>' + esc(f.lead) + '</h2>' +
       '<div class="acc faq__acc">' + items + '</div>' +
     '</div></section>';
   }
@@ -744,7 +783,7 @@
     }).join('');
 
     return '<section class="loc" id="contacts"><div class="wrap">' +
-      '<h2 class="loc__lead">' + esc(l.lead) + '</h2>' +
+      '<h2 class="loc__lead" data-reveal>' + esc(l.lead) + '</h2>' +
       '<div class="loc__grid">' +
 
         '<div>' +
@@ -826,7 +865,7 @@
   function renderForm() {
     return '<section class="form" id="zapis"><div class="wrap">' +
       '<div class="form__card">' +
-        '<h2 class="form__lead">' + esc(S.form.lead).replace(' — ', '&nbsp;— ').replace(/\n/g, '<br>') + '</h2>' +
+        '<h2 class="form__lead" data-reveal>' + esc(S.form.lead).replace(' — ', '&nbsp;— ').replace(/\n/g, '<br>') + '</h2>' +
         leadFormHtml('низ страницы') +
       '</div>' +
     '</div></section>';
@@ -914,10 +953,13 @@
   function renderReelFloat() {
     var r = (S.reelFloat || {});
     if (!r.video || IS_PRERENDER) return '';
-    return '<div class="reelfloat" data-reelfloat>' +
+    /* В углу крутится лёгкий кусок, полный ролик ждёт своего часа в data-полном:
+       так посетитель не качает пять мегабайт ради фоновой петли. */
+    var fon = r.videoFon || r.video;
+    return '<div class="reelfloat" data-reelfloat data-reelfloat-full="' + esc(r.video) + '">' +
         '<button class="reelfloat__box" type="button" data-reelfloat-toggle aria-label="Смотреть ролик">' +
           '<video class="reelfloat__video" muted loop playsinline preload="metadata" ' +
-            'poster="' + esc(r.poster || '') + '"><source src="' + esc(r.video) + '" type="video/mp4"></video>' +
+            'poster="' + esc(r.poster || '') + '"><source src="' + esc(fon) + '" type="video/mp4"></video>' +
           '<span class="reelfloat__badge">' + ic('play', { size: 14 }) + esc(r.label || 'Смотреть') + '</span>' +
         '</button>' +
         '<button class="reelfloat__close" type="button" data-reelfloat-hide aria-label="Убрать ролик">' +
@@ -931,6 +973,36 @@
     var v = box.querySelector('video');
     var big = false;
 
+    /* Телефон: ролик стоит в левом нижнем углу и закрывает счётчик «машин на
+       газу», которым теперь заканчивается первый экран. Поэтому показываем его
+       не сразу, а когда человек тронулся вниз и доехал до бегущей строки -
+       первый экран остаётся чистым. На компьютере ролик справа, счётчик слева,
+       они не пересекаются, и правило не нужно. Решение Eugene, 30.09.2026. */
+    var telefon = window.matchMedia('(max-width: 1023px)').matches;
+    var sledom = document.querySelector('.clients');
+    if (telefon && sledom && 'IntersectionObserver' in window) {
+      box.classList.add('is-later');
+      new IntersectionObserver(function (zapisi, nabl) {
+        if (!zapisi[0].isIntersecting) return;
+        box.classList.remove('is-later');
+        nabl.disconnect();
+      }).observe(sledom);
+    }
+
+    var polnyy = box.getAttribute('data-reelfloat-full') || '';
+    var polnyyVkadre = !polnyy || v.currentSrc.indexOf(polnyy) >= 0;
+    var zapas = null;
+
+    /* Прогрев: скрытый элемент кладёт полный ролик в кеш браузера, пока человек
+       только тянется к нему мышкой или пальцем. Подменять источник заранее
+       нельзя - фоновая петля дёрнулась бы прямо на глазах. */
+    function prigotovitPolnyy() {
+      if (zapas || polnyyVkadre) return;
+      zapas = document.createElement('video');
+      zapas.preload = 'auto';
+      zapas.muted = true;
+      zapas.src = polnyy;
+    }
     function playQuiet() {
       if (document.hidden || PREFERS_STILL.matches) return;
       var p = v.play();
@@ -939,6 +1011,12 @@
     function toBig() {
       big = true;
       box.classList.add('is-big');
+      if (!polnyyVkadre) {        /* время смотреть целиком — берём полный файл */
+        polnyyVkadre = true;
+        v.src = polnyy;
+        v.load();
+        v.addEventListener('loadedmetadata', function () { v.currentTime = 0; }, { once: true });
+      }
       v.currentTime = 0;          /* смотрим с начала, а не с середины */
       v.muted = false;
       v.controls = true;
@@ -956,6 +1034,9 @@
       /* в большом виде клики по полосе проигрывателя не должны сворачивать */
       if (big && e.target.tagName === 'VIDEO') return;
       big ? toSmall() : toBig();
+    });
+    ['pointerenter', 'touchstart'].forEach(function (sobytie) {
+      box.addEventListener(sobytie, prigotovitPolnyy, { passive: true, once: true });
     });
     box.querySelector('[data-reelfloat-hide]').addEventListener('click', function (e) {
       e.stopPropagation();
@@ -992,19 +1073,33 @@
        без слайдов, часов работы и прочего «живого» состояния. */
     if (/[?&]prerender\b/.test(location.search)) return;
 
-    wireHeader();
-    wireHero();
-    wireClients();
-    wireTuning();
-    wireCalc();
-    wireAccordions();
-    wireCarousels();
-    wireDock();
-    wireReelFloat();
-    wireTerms();
-    wireImageFade();
-    wireConsent();
-    wireLeadForms();
+    /* Каждый блок подключается сам по себе. Раньше они шли одной цепочкой,
+       и ошибка в любом (например, поменялась разметка вкладок) обрывала все
+       следующие: окно заявки не открывалось, кнопки просто прокручивали
+       страницу вниз, а выглядело всё целым. Теперь сбой одного блока
+       остаётся в консоли, остальные подключаются. */
+    var uzly = [
+      ['шапка',                wireHeader],
+      ['первый экран',         wireHero],
+      ['бегущая строка',       wireClients],
+      ['вкладки настройки',    wireTuning],
+      ['калькулятор',          wireCalc],
+      ['вопросы и ответы',     wireAccordions],
+      ['ленты с прокруткой',   wireCarousels],
+      ['нижняя панель',        wireDock],
+      ['ролик в углу',         wireReelFloat],
+      ['подсказки к словам',   wireTerms],
+      ['проявление картинок',  wireImageFade],
+      ['плашка cookie',        wireConsent],
+      ['окно заявки',          wireLeadForms]
+    ];
+    for (var ui = 0; ui < uzly.length; ui++) {
+      try {
+        uzly[ui][1]();
+      } catch (err) {
+        console.error('[сборка] не подключилось: ' + uzly[ui][0], err);
+      }
+    }
   }
 
   /* ---------- шапка ---------- */
@@ -1119,16 +1214,18 @@
   /* ---------- блок 3: три подблока ---------- */
   function wireTuning() {
     var subs = S.tuning.subblocks;
-    var panel = document.getElementById('tuning-panel');
+    var panels = [].slice.call(document.querySelectorAll('#tuning-panel > .panel'));
     var tabs = [].slice.call(document.querySelectorAll('.tab'));
     var section = document.getElementById('tuning');
     var idx = 0;
 
     /* Автосмены нет: подблоки переключаются только вкладками и стрелками.
-       То, что подблоков несколько, видно по вкладкам — сам текст не двигается. */
+       То, что подблоков несколько, видно по вкладкам — сам текст не двигается.
+       Все три панели уже лежат в странице (renderTuning), поэтому панель не
+       рисуется заново, а только переносится отметка is-active. */
     function show(i) {
       idx = (i + subs.length) % subs.length;
-      panel.innerHTML = panelHtml(idx);
+      panels.forEach(function (p, k) { p.classList.toggle('is-active', k === idx); });
       tabs.forEach(function (t, k) { t.classList.toggle('is-active', k === idx); });
     }
 
@@ -1147,6 +1244,21 @@
     }
     window.addEventListener('hashchange', fromHash);
     fromHash();
+
+    /* Ссылка меняет только часть адреса после решётки, а вкладки адрес не меняют.
+       Пока адрес тот же, повторное нажатие браузер за переход не считает (события
+       hashchange нет) - ссылка молчала. Тогда запускаем тот же fromHash сами. */
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('a[href^="#tuning-"]') : null;
+      if (!a || a.getAttribute('href') !== location.hash) return;
+      e.preventDefault();
+      fromHash();
+    });
+
+    /* Лишние панели прячем только теперь, когда вкладки точно работают: класс на <html>
+       включает правило .js-tabs в blocks.css (тот же приём, что js-fade у фото). Скрипт
+       упал раньше - класса нет, и человек видит все три панели подряд, а не пустоту. */
+    document.documentElement.classList.add('js-tabs');
   }
 
   /* ---------- блок 5: калькулятор и раскрывающиеся пункты ---------- */
@@ -1191,8 +1303,9 @@
 
   /* ---------- блок 9: карта грузится по клику ---------- */
   /* Термины с подсказкой. Слушаем на документе, а не на самих словах:
-     панель блока 3 перерисовывается при смене вкладки, и обычные
-     обработчики бы отваливались. На компьютере подсказка и так открыта
+     одни обработчики на все слова, где бы страница их ни нарисовала.
+     Открытая подсказка закрывается любым нажатием вне слова, в том числе
+     нажатием на вкладку. На компьютере подсказка и так открыта
      по наведению — здесь только тап и закрытие. */
   function wireTerms() {
     /* Подсказка выравнена по левому краю слова. Если слово стоит у правого
@@ -1674,28 +1787,97 @@
     };
 
     /* Фоновая отправка заявки.
-       keepalive — чтобы запрос долетел, даже если человек в ту же секунду закрыл
-       вкладку или ушёл в WhatsApp.
-       Один повтор через полторы секунды: у заявки есть свой номер, поэтому
-       повторный запрос сервер отбросит, а не заведёт вторую такую же заявку. */
-    function sendLead(lead, triesLeft) {
+       Человек оставил номер и ушёл, второго захода на сайт не будет, поэтому
+       заявку надо поймать за этот один визит:
+       - до пяти попыток с нарастающей паузой, всё вместе около 30 секунд;
+       - на каждую попытку не больше 8 секунд, иначе зависшая сеть съест весь запас;
+       - если вкладку закрыли или человек ушёл в WhatsApp, запланированная попытка
+         умрёт вместе со страницей, поэтому при уходе неподтверждённые заявки
+         досылаются сразу (flushLeads).
+       У заявки есть свой номер (id): сервер по нему узнаёт повтор и не заводит
+       вторую такую же заявку, так что слать повторно безопасно. Подтверждённой
+       заявка считается, когда сервер ответил успехом - после этого не шлём ничего. */
+    var LEAD_PAUSES = [1500, 4000, 10000, 10000];   // пауза перед 2-й, 3-й, 4-й и 5-й попыткой
+    var LEAD_TRY_MS = 8000;       // сколько ждём ответ на одну попытку
+    var LEAD_TOTAL_MS = 30000;    // за это время должны уложиться все попытки
+    var leadJobs = [];            // заявки, которые сервер ещё не подтвердил
+
+    /* text/plain - «простой» запрос: браузер не шлёт лишнюю предварительную проверку.
+       keepalive - чтобы запрос долетел, даже если человек в ту же секунду закрыл вкладку. */
+    function leadRequest(job) {
+      return {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: job.body,
+        keepalive: true,
+      };
+    }
+
+    function leadConfirmed(job) {
+      var i = leadJobs.indexOf(job);
+      if (i > -1) leadJobs.splice(i, 1);
+    }
+
+    /* Следующая попытка - после паузы и только пока не вышли 30 секунд. Заявка при
+       этом остаётся в leadJobs: если человек уйдёт со страницы, её ещё раз досылает flushLeads. */
+    function retryLead(job) {
+      var pause = LEAD_PAUSES[job.tries - 1];
+      if (pause == null || Date.now() + pause >= job.started + LEAD_TOTAL_MS) return;
+      setTimeout(function () { tryLead(job); }, pause);
+    }
+
+    function tryLead(job) {
+      job.tries++;
+      var opts = leadRequest(job);
+      /* Своё время на каждую попытку. AbortSignal.timeout есть не везде (старые телефоны) -
+         там то же самое делаем через AbortController. Последняя попытка не должна вылезти
+         за общий срок; нижняя граница - чтобы время не стало нулевым или отрицательным. */
+      var ms = Math.max(1000, Math.min(LEAD_TRY_MS, job.started + LEAD_TOTAL_MS - Date.now()));
+      var timer = 0;
+      if (window.AbortSignal && AbortSignal.timeout) {
+        opts.signal = AbortSignal.timeout(ms);
+      } else if (window.AbortController) {
+        var ctl = new AbortController();
+        opts.signal = ctl.signal;
+        timer = setTimeout(function () { ctl.abort(); }, ms);
+      }
+      fetch(job.url, opts).then(function (r) {
+        clearTimeout(timer);
+        if (r.ok) leadConfirmed(job); else retryLead(job);
+      }, function () {
+        clearTimeout(timer);
+        retryLead(job);
+      });
+    }
+
+    function sendLead(lead) {
       var url = C.leads && C.leads.endpoint;
       if (!url) {
         console.warn('[leads] Не задан адрес для заявок (config.js → leads.endpoint) — заявка не сохранена.', lead);
         return;
       }
-      if (triesLeft == null) triesLeft = 1;
-      var again = function () {
-        if (triesLeft > 0) setTimeout(function () { sendLead(lead, triesLeft - 1); }, 1500);
-      };
-      /* text/plain — «простой» запрос: браузер не шлёт лишнюю предварительную проверку */
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify(lead),
-        keepalive: true,
-      }).then(function (r) { if (!r.ok) again(); }).catch(again);
+      var job = { url: url, body: JSON.stringify(lead), started: Date.now(), tries: 0, flushedAt: 0 };
+      leadJobs.push(job);
+      tryLead(job);
     }
+
+    /* Человек уходит (закрыл вкладку, перешёл в WhatsApp): страница вот-вот умрёт
+       вместе с запланированными повторами, поэтому неподтверждённые заявки уходят
+       сразу. sendBeacon браузер доводит до конца сам, даже когда страницы уже нет;
+       нет его - тот же запрос через fetch с keepalive. */
+    function flushLeads() {
+      leadJobs.forEach(function (job) {
+        /* при закрытии вкладки приходят оба события подряд - одно и то же дважды не шлём */
+        if (Date.now() - job.flushedAt < 1000) return;
+        job.flushedAt = Date.now();
+        if (navigator.sendBeacon && navigator.sendBeacon(job.url, job.body)) return;
+        fetch(job.url, leadRequest(job)).catch(function () {});
+      });
+    }
+    window.addEventListener('pagehide', flushLeads);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') flushLeads();
+    });
 
     document.querySelectorAll('[data-lead-form]').forEach(function (form) {
       var inModal = modal.contains(form);

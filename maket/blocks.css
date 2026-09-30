@@ -56,6 +56,23 @@
   .hero__inner { grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 88px); }
 }
 
+/* Телефон и планшет: текстовая часть занимает высоту окна, поэтому нижняя
+   граница экрана приходится на счётчик «машин на газу», а фотография уходит
+   ниже - её человек видит, когда листает. Так первый экран не перегружен.
+   Решение Eugene, 30.09.2026. Вычитаем шапку (она накладывается сверху) и
+   72 px: 32 - верхний отступ самого экрана, 40 - воздух под счётчиком.
+   100svh - высота окна без адресной строки браузера; старым браузерам
+   остаётся строка с vh выше. */
+@media (max-width: 1023px) {
+  .hero__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100vh - var(--header-h) - 72px);
+    min-height: calc(100svh - var(--header-h) - 72px);
+  }
+}
+
 /* ---------- левая колонка ---------- */
 .hero__title { font-size: var(--fs-display); letter-spacing: -0.038em; text-wrap: balance; }
 /* Самые узкие телефоны (320 px): строки, которые обычно стоят в одну
@@ -225,7 +242,7 @@
 .clients__track {
   display: flex;
   width: max-content;
-  animation: clients-run 42s linear infinite;
+  animation: clients-run 54s linear infinite;
 }
 /* Две одинаковые группы. Сдвиг на -50% = ровно одна группа,
    поэтому лента идёт по кругу без разрыва и пустоты. */
@@ -564,6 +581,24 @@
 .panel { animation: panel-in .35s ease both; }
 @keyframes panel-in { from { opacity: 0; transform: translateY(10px); } }
 @media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+
+/* Три панели лежат в странице все сразу: текст двух закрытых нужен поисковику.
+   Прячем их ТОЛЬКО под классом .js-tabs, который ставит на <html> сам скрипт в конце
+   wireTuning (тот же приём, что .js-fade у фото ниже). Скрипт не запустился - класса
+   нет, видны все три панели подряд, а не пустота на месте текста.
+   Именно display: none. Прозрачность, visibility или сдвиг за экран не годятся: браузер
+   тогда качает фото закрытых панелей сразу (лишние ~473 КБ), а анимация появления при
+   переключении не повторяется. Атрибут hidden не годится тоже: его перебивает
+   display: grid у .panel выше. */
+.js-tabs .panel:not(.is-active) { display: none; }
+
+/* Фото закрытых панелей. Пока скрипт не подтвердил вкладки, панели лежат в странице все
+   сразу, и на широком экране браузер успевает счесть фото второй панели «близкими» и
+   скачать их (замер на медленной сети: +2 файла, около 250 КБ), хотя через секунду
+   панель спрячется. Поэтому сами фото не рисуем (display: none - такие лениво
+   загружаемые картинки не качаются); текст панели остаётся виден. Панель стала открытой -
+   правило на неё больше не действует, и фото грузятся как раньше. */
+.panel:not(.is-active) .panel__media { display: none; }
 
 /* карточка отзыва как ссылка на Яндекс.Карты */
 .panel__review.is-link { display: block; transition: border-color .2s, background-color .2s; }
@@ -1605,9 +1640,64 @@ html.is-modal { overflow: hidden; }
 .reelfloat.is-big { width: calc(60vh * 9 / 16); max-width: 78vw; }
 .reelfloat.is-big .reelfloat__box { cursor: zoom-out; }
 
+/* пока человек не тронулся вниз, ролик на телефоне не показывается:
+   он закрывал бы счётчик в конце первого экрана (см. app.js, wireReelFloat) */
+.reelfloat.is-later { opacity: 0; visibility: hidden; }
+.reelfloat { transition: width .28s var(--ease-out, ease-out), opacity .3s ease; }
+
 @media (max-width: 600px) {
   .reelfloat { width: 74px; left: 10px; bottom: 16px; }
   .reelfloat.is-big { width: min(60vw, calc(58vh * 9 / 16)); bottom: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .reelfloat { transition: none; } }
 
+/* ---------- правки 30.09: цена, окупаемость, рассрочка, первое ТО ---------- */
+/* Срок возврата денег - следом за экономией, тем же весом */
+.calc__payback {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+}
+.calc__payback span { color: var(--text-muted); }
+.calc__payback b { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+
+/* Рассрочка - спокойной строкой под кнопкой, это не обещание, а возможность */
+.calc__installment {
+  margin-top: 12px;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* Цена комплекта - последней строкой раскрытого пункта */
+.acc__price {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+  font-weight: 700;
+}
+
+/* Первое обслуживание - над карточками гарантии */
+.warranty__first {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.warranty__first svg { flex-shrink: 0; color: var(--accent-hot, var(--accent)); }
+
+/* Телефон: кнопки записи во всю ширину - в них проще попасть пальцем.
+   Решение Eugene 30.09. */
+@media (max-width: 719px) {
+  .hero__actions .btn,
+  .panel__ctas .btn,
+  .calc__go,
+  .lead__submit { width: 100%; justify-content: center; }
+  .hero__actions { align-items: stretch; }
+  .panel__ctas { display: grid; }
+}

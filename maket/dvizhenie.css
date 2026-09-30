@@ -1,0 +1,66 @@
+/* =====================================================================
+   ГОЛУБАЯ ТЯЖЕСТЬ — движение. Приёмы с deepbook.tech без сторонних библиотек.
+   Подключается вместе с dvizhenie.js. Каждый приём включается пометкой
+   в разметке, список и примеры — в INDEX.md рядом.
+
+   Всё, что прячется до появления, прячется только под классом .dv на
+   <html>. Его ставит одна строка в <head> (см. INDEX.md). Нет скрипта или
+   человек выключил анимации в системе — страница показывается целиком,
+   без движения.
+   ===================================================================== */
+:root {
+  /* «Тяжёлая» кривая: медленный старт, быстрая середина, мягкая посадка.
+     У deepbook она стоит на всём по умолчанию — отсюда ощущение веса. */
+  --ease-heavy: cubic-bezier(.65, 0, .35, 1);
+  /* Длинный выдох: рывок и долгий дотяг. Для выезда заголовков. */
+  --ease-exhale: cubic-bezier(.19, 1, .22, 1);
+  /* Цвет, которым «перебирается» подпись под цифрой */
+  --dv-accent: var(--accent, #1e6ef3);
+}
+
+/* --- Заголовок выезжает строками: data-reveal --- */
+.dv [data-reveal]:not(.is-in) { visibility: hidden; }
+.dv-w { display: inline-block; }
+
+/* --- Дети блока появляются по очереди: data-stagger --- */
+.dv [data-stagger]:not(.is-in) > * { opacity: 0; }
+
+/* --- Цифры-барабаны: data-count --- */
+.dv-reel {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  text-align: center;
+}
+.dv-reel__col { display: flex; flex-direction: column; align-items: center; }
+.dv-reel__col > span { display: block; }
+.dv-scramble { white-space: nowrap; }
+.dv-scramble > span { display: inline-block; text-align: center; }
+
+/* --- Линия с квадратиками: data-divider --- */
+/* Без скрипта квадратики стоят по краям — это и есть конечная точка */
+[data-divider] {
+  --size: 9px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--size);
+}
+[data-divider]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: currentColor;
+  opacity: .2;
+}
+[data-divider] > i {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  background: var(--dv-accent);
+  will-change: transform;
+}
