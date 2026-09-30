@@ -973,7 +973,10 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
 .dock.is-dragging { scroll-snap-type: none; cursor: grabbing; }
 .dock.is-dragging * { pointer-events: none; }
 @media (hover: none) { .dock { scroll-snap-type: x mandatory; } }
-.dock__item { flex: 0 0 auto; scroll-snap-align: center; cursor: pointer; }
+/* scroll-snap-stop: always - палец за один мах переводит ленту ровно на
+   одну карточку. Без него инерция пролетала через несколько фотографий
+   сразу (Eugene, 30.09). */
+.dock__item { flex: 0 0 auto; scroll-snap-align: center; scroll-snap-stop: always; cursor: pointer; }
 .dock__card {
   position: relative;
   height: var(--dock-h);
@@ -983,7 +986,7 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--accent-hot); 
   background: #0b0607 center / cover no-repeat;
   opacity: .45;
   transform: scale(.88);
-  transition: opacity .22s ease-out, transform .22s ease-out;
+  transition: opacity .45s cubic-bezier(.22,.61,.36,1), transform .45s cubic-bezier(.22,.61,.36,1);
 }
 .dock__item.is-active .dock__card { opacity: 1; transform: translateY(-12px) scale(1); }
 /* contain, а не cover: кадр показываем целиком, ничего не срезаем */
@@ -1592,7 +1595,7 @@ html.is-modal { overflow: hidden; }
   color: var(--text-dim);
   text-align: center;
   opacity: .55;
-  transition: opacity .2s ease-out, color .2s ease-out;
+  transition: opacity .45s cubic-bezier(.22,.61,.36,1), color .45s cubic-bezier(.22,.61,.36,1);
 }
 .dock__item.is-active .dock__cap { opacity: 1; color: var(--text-muted); }
 
@@ -1686,11 +1689,17 @@ html.is-modal { overflow: hidden; }
 
 /* Рассрочка - спокойной строкой под кнопкой, это не обещание, а возможность */
 .calc__installment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-top: 12px;
   text-align: center;
   font-size: var(--fs-sm);
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--text);
 }
+.calc__installment svg { flex-shrink: 0; color: var(--accent-hot, var(--accent)); }
 
 /* Цена комплекта - последней строкой раскрытого пункта */
 .acc__price {

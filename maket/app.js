@@ -592,7 +592,8 @@
          видно, когда она перекроет установку. Решение Eugene 30.09. */
       paybackHtml(r) +
       leadBtn('btn--cta calc__go', c.cta.label, 'калькулятор', 16, calcNote) +
-      (c.installment ? '<p class="calc__installment">' + esc(c.installment) + '</p>' : '');
+      (c.installment ? '<p class="calc__installment">' + ic('file', { size: 17 }) +
+        '<span>' + accent(c.installment) + '</span></p>' : '');
   }
 
   function paybackHtml(r) {
@@ -699,7 +700,8 @@
     }).join('');
 
     return '<section class="team" id="team"><div class="wrap">' +
-      '<h2 class="team__title" data-reveal>' + accent(t.title) + '</h2>' +
+      /* \n в заголовке = перенос строки: Eugene просил две строки */
+      '<h2 class="team__title" data-reveal>' + accent(t.title).replace(/\n/g, '<br>') + '</h2>' +
       '<div class="team__grid" data-stagger>' + people + '</div>' +
       '<div class="not">' +
         '<h3 class="not__title">' + esc(t.notTitle) + '</h3>' +
