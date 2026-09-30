@@ -1470,7 +1470,17 @@ a.review:hover .review__foot { color: var(--text-muted); }
 .lead__check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
 .lead__check input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--accent-btn); }
 .lead__check span { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-muted); }
-.lead__check a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+/* Ссылки на политику и согласия: тем же цветом, что и текст рядом, с тонкой
+   приглушённой чертой. Белым и жирной чертой они выпрыгивали из окна заявки и
+   тянули взгляд на себя вместо кнопки (Eugene 30.09). */
+.lead__check a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(244, 242, 241, .28);
+  text-underline-offset: 3px;
+}
+.lead__check a:hover { color: var(--text); text-decoration-color: rgba(244, 242, 241, .5); }
 .lead__err { font-size: var(--fs-xs); font-style: normal; color: #ff8a82; text-align: center; }
 .lead__err[hidden] { display: none; }
 .lead__trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }

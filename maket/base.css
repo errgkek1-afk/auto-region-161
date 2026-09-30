@@ -317,13 +317,23 @@ a[data-no-phone] { cursor: default; }
 .cookie[hidden] { display: none; }
 @media (min-width: 640px) { .cookie { right: auto; max-width: 440px; } }
 .cookie__text { font-size: var(--fs-xs); line-height: 1.5; color: var(--text-muted); }
-.cookie__text a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+/* см. то же в .lead__check a: ссылка не должна быть ярче самой плашки */
+.cookie__text a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(244, 242, 241, .28);
+  text-underline-offset: 3px;
+}
+.cookie__text a:hover { color: var(--text); text-decoration-color: rgba(244, 242, 241, .5); }
 .cookie__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .cookie__ghost { border: 1px solid var(--line-strong); color: var(--text-muted); }
 .cookie__ghost:hover { color: var(--text); border-color: var(--text-dim); }
 .cookie__link {
   padding: 8px 4px; font-size: var(--fs-sm); color: var(--text-muted);
-  text-decoration: underline; text-underline-offset: 3px;
+  /* черта такая же тонкая и приглушённая, как у ссылок в тексте плашки */
+  text-decoration: underline; text-decoration-thickness: 1px;
+  text-decoration-color: rgba(244, 242, 241, .28); text-underline-offset: 3px;
 }
 .cookie__link:hover { color: var(--text); }
 /* второй экран уведомления — выбор по видам cookie */
