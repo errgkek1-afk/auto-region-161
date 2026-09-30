@@ -285,9 +285,11 @@
           '<ul class="hero__hooks" data-stagger>' + hooks + '</ul>' +
           '<div class="hero__actions">' +
             leadBtn('btn--cta', h.cta, 'первый экран', 18) +
-            '<p class="hero__counter" data-count>' +
-              '<b id="hero-counter" data-count-num>' + fmt(installCount()) + '</b>' +
-              '<span data-count-text>' + esc(h.counterLabel) + '</span>' +
+            /* Счётчик машин просто появляется - барабан тут Eugene не захотел (30.09).
+                 data-stagger = число и подпись проявляются по очереди. */
+              '<p class="hero__counter" data-stagger>' +
+              '<b id="hero-counter">' + fmt(installCount()) + '</b>' +
+              '<span>' + esc(h.counterLabel) + '</span>' +
             '</p>' +
           '</div>' +
         '</div>' +
