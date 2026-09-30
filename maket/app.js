@@ -761,7 +761,7 @@
         '<h2 class="reviews__lead" data-reveal>' + accent(r.lead) + '</h2>' +
         ratings +
       '</div>' +
-      '<div class="reviews__grid">' + items + '</div>' +
+      '<div class="reviews__grid" data-lenta>' + items + '</div>' +
       '<div class="reviews__cta">' +
         '<p>' + esc(r.cta.lead) + '</p>' +
         '<div class="reviews__buttons">' + buttons + '</div>' +
@@ -1107,6 +1107,7 @@
       ['вопросы и ответы',     wireAccordions],
       ['ленты с прокруткой',   wireCarousels],
       ['нижняя панель',        wireDock],
+      ['ленты под мышь',       wireLenty],
       ['ролик в углу',         wireReelFloat],
       ['подсказки к словам',   wireTerms],
       ['проявление картинок',  wireImageFade],
@@ -1642,6 +1643,70 @@
       /* старт — с первой карточки: первым человек видит ролик №1 */
       el.scrollLeft = centerOf(0);
       mark();
+    });
+  }
+
+  /* ---------- лента, которую тянут мышью ----------
+     Тот же приём, каким листается лента фотографий работ. На компьютере без
+     него лента стоит мёртвой: колесо крутит страницу, а не карточки, и человек
+     видит только первые отзывы (Eugene 30.09: «как наши работы сделать
+     листание», стрелок не надо). Телефона не касается - там листает палец. */
+  function wireLenty() {
+    document.querySelectorAll('[data-lenta]').forEach(function (el) {
+      var items = [].slice.call(el.children);
+      if (items.length < 2) return;
+      var s = null, gasitKlik = false, dovodka = 0;
+      var plavno = function () { return PREFERS_STILL.matches ? 'auto' : 'smooth'; };
+
+      /* карточки прилипают левым краем, поэтому считаем от первой */
+      function levo(i) { return items[i].offsetLeft - items[0].offsetLeft; }
+      function blizhayshaya(pos) {
+        var best = 0, bd = Infinity;
+        items.forEach(function (_, i) { var d = Math.abs(levo(i) - pos); if (d < bd) { bd = d; best = i; } });
+        return best;
+      }
+      function kuda(i) { el.scrollTo({ left: levo(i), behavior: plavno() }); }
+
+      function onMove(e) {
+        if (!s || e.pointerId !== s.id) return;
+        var dx = e.clientX - s.x;
+        if (!s.tyanuli) { if (Math.abs(dx) < 3) return; s.tyanuli = true; el.classList.add('is-dragging'); }
+        e.preventDefault();
+        var now = performance.now(), dt = now - s.lt;
+        if (dt > 0) s.v = 0.7 * ((e.clientX - s.lx) / dt) + 0.3 * s.v;
+        s.lx = e.clientX; s.lt = now;
+        el.scrollLeft = s.left - dx;
+      }
+      function onUp(e) {
+        if (!s || e.pointerId !== s.id) return;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        var st = s; s = null;
+        if (!st.tyanuli) { el.classList.remove('is-dragging'); return; }  /* обычный клик по отзыву */
+        gasitKlik = true;                       /* карточка - ссылка: после протяжки её не открываем */
+        setTimeout(function () { gasitKlik = false; }, 80);
+        if (performance.now() - st.lt > 100) st.v = 0;
+        kuda(blizhayshaya(el.scrollLeft - st.v * 180));
+        clearTimeout(dovodka);
+        /* притягивание возвращаем после доводки, иначе лента дёргается */
+        dovodka = setTimeout(function () { el.classList.remove('is-dragging'); }, 450);
+      }
+
+      el.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        clearTimeout(dovodka);
+        s = { id: e.pointerId, x: e.clientX, left: el.scrollLeft, lx: e.clientX,
+              lt: performance.now(), v: 0, tyanuli: false };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
+      });
+      el.addEventListener('click', function (e) {
+        if (gasitKlik) { e.preventDefault(); e.stopPropagation(); }
+      }, true);
+      /* браузер сам таскает ссылки, как картинки, - это мешает тянуть ленту */
+      el.addEventListener('dragstart', function (e) { e.preventDefault(); });
     });
   }
 

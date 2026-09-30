@@ -1153,8 +1153,14 @@ a.rating:active { transform: scale(.98); }
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;                /* полосу прокрутки прячем: лист пальцем */
   padding-bottom: 4px;
+  /* на компьютере ленту тянут мышью, как ленту фотографий работ */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .reviews__grid::-webkit-scrollbar { display: none; }
+.reviews__grid.is-dragging { scroll-snap-type: none; cursor: grabbing; }
+.reviews__grid.is-dragging * { pointer-events: none; }
 .reviews__grid > .review {
   flex: 0 0 86%;
   scroll-snap-align: start;
