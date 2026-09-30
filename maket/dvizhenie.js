@@ -22,7 +22,6 @@
   var EASE_HEAVY = 'cubic-bezier(.65, 0, .35, 1)';
   var EASE_EXHALE = 'cubic-bezier(.19, 1, .22, 1)';
   var EASE_REEL = 'cubic-bezier(.215, .61, .355, 1)';
-  var SYMBOLS = '!@#$%^&*()_+-=[]{}|;:,.<>?/~';
 
   function all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
   function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -116,123 +115,25 @@
     });
   }
 
-  /* --- data-count: цифры-барабаны и перебор подписи --- */
+  /* --- data-count: цифра просто появляется ---
+     Раньше здесь крутился барабан из цифр, а подпись перебирала случайные
+     знаки. Оба приёма подменяли разметку: барабан выше и шире обычного текста,
+     у букв подписи фиксировалась ширина. Строка со счётчиком прыгала на
+     полтора десятка точек вбок, карточка гарантии дёргалась на четыре сотни
+     вниз. Решение Eugene 30.09: пусть цифра просто появляется. Разметку
+     не трогаем вообще - двигать нечему, прыгать нечему. */
   function count(el) {
     onEnter(el, 0.85, function () {
-      var num = el.querySelector('[data-count-num]');
-      var cap = el.querySelector('[data-count-text]');
-      if (num) roll(num);
-      if (cap) scramble(cap);
-    });
-  }
-
-  // Каждая цифра — столбик из 11 цифр, который прокручивается на полный круг
-  // и встаёт на ту же цифру. Размеры в em, чтобы не зависеть от размера шрифта.
-  function roll(el) {
-    var text = el.textContent;
-    var cs = getComputedStyle(el);
-    var fs = parseFloat(cs.fontSize);
-    var lh = (parseFloat(cs.lineHeight) || fs * 1.2) / fs;
-    var k = 0, last;
-    /* Место под цифру занимаем заранее, по её обычному виду: барабан выше и
-       шире обычного текста, и без этого строка со счётчиком (а вместе с ней
-       и вся карточка) дёргается в начале и в конце прокрутки. */
-    var mesto = el.getBoundingClientRect();
-    el.style.minWidth = mesto.width + 'px';
-    el.style.height = mesto.height + 'px';
-    el.style.verticalAlign = 'top';
-    el.textContent = '';
-    el.style.display = 'inline-flex';
-    text.split('').forEach(function (ch) {
-      var s = document.createElement('span');
-      if (!/\d/.test(ch)) {
-        s.style.whiteSpace = 'pre';
-        s.textContent = ch;
-        el.appendChild(s);
-        return;
-      }
-      s.textContent = ch; // замер ширины именно этой цифры
-      el.appendChild(s);
-      var w = s.getBoundingClientRect().width / fs;
-      var col = document.createElement('span');
-      col.className = 'dv-reel__col';
-      col.style.lineHeight = lh + 'em';
-      for (var i = 0; i <= 10; i++) {
-        var c = document.createElement('span');
-        c.style.height = lh + 'em';
-        c.textContent = (+ch + i) % 10;
-        col.appendChild(c);
-      }
-      s.className = 'dv-reel';
-      s.style.height = lh + 'em';
-      s.style.width = w + 'em';
-      s.textContent = '';
-      s.appendChild(col);
-      last = col.animate([
-        { transform: 'translateY(-' + 10 * lh + 'em)' },
-        { transform: 'none' }
-      ], { duration: 900, delay: k++ * 40, easing: EASE_REEL, fill: 'backwards' });
-    });
-    var vernut = function () {
-      el.textContent = text;
-      el.style.display = '';
-      el.style.minWidth = '';
-      el.style.height = '';
-      el.style.verticalAlign = '';
-    };
-    if (!last) { vernut(); return; }
-    last.onfinish = vernut;
-  }
-
-  // Буквы подписи перебирают случайные знаки акцентным цветом и встают
-  // по одной слева направо; вся подпись собирается за 1,6 с
-  function scramble(el) {
-    var text = el.textContent;
-    var chars = [];
-    /* Ширину подписи держим прежней: у букв с заданной шириной строка длиннее,
-       и в конце перебора подпись прыгала вбок на полтора десятка точек. */
-    var mesto = el.getBoundingClientRect();
-    el.style.display = 'inline-block';
-    el.style.minWidth = mesto.width + 'px';
-    splitWords(el, function (word) {
-      var w = document.createElement('span');
-      w.className = 'dv-scramble';
-      word.split('').forEach(function (ch) {
-        var s = document.createElement('span');
-        s.textContent = ch;
-        w.appendChild(s);
-        chars.push({ el: s, ch: ch });
+      el.classList.add('is-in');
+      var deti = [el.querySelector('[data-count-num]'), el.querySelector('[data-count-text]')];
+      deti.forEach(function (x, i) {
+        if (!x) return;
+        x.animate([
+          { opacity: 0, transform: 'translateY(10px)' },
+          { opacity: 1, transform: 'none' }
+        ], { duration: 560, delay: i * 120, easing: EASE_HEAVY, fill: 'backwards' });
       });
-      return { outer: w };
     });
-    // Ширину каждой буквы фиксируем, иначе строка дрожит от разных знаков
-    chars.forEach(function (c) {
-      c.el.style.width = c.el.getBoundingClientRect().width + 'px';
-      c.el.style.color = 'var(--dv-accent)';
-    });
-    var step = 1600 / chars.length;
-    var start = performance.now();
-    (function tick(now) {
-      var t = now - start, done = true;
-      chars.forEach(function (c, i) {
-        if (c.settled) return;
-        if (t >= i * step) {
-          c.el.textContent = c.ch;
-          c.el.style.color = '';
-          c.settled = true;
-          return;
-        }
-        done = false;
-        c.el.textContent = SYMBOLS[Math.random() * SYMBOLS.length | 0];
-      });
-      if (done) {
-        el.textContent = text;
-        el.style.display = '';
-        el.style.minWidth = '';
-        return;
-      }
-      requestAnimationFrame(tick);
-    })(start);
   }
 
   /* --- data-divider: квадратики из центра к краям, с запаздыванием --- */
