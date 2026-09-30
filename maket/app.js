@@ -1116,6 +1116,32 @@
         console.error('[сборка] не подключилось: ' + uzly[ui][0], err);
       }
     }
+
+    podklyuchitDvizhenie();
+  }
+
+  /* ---------- движение (шаблон «Голубая тяжесть») ----------
+     Подключается ТОЛЬКО здесь, после того как страница нарисована.
+     Причина: dvizhenie.js вешает наблюдатели один раз, в момент своего
+     запуска. Подключённый тегом в <head> или с defer, он отрабатывал на
+     вшитом снимке страницы, а build() тут же заменял всю разметку - вместе
+     с элементами уезжали и наблюдатели. Класс dv при этом продолжал прятать
+     содержимое, и блоки не проявлялись никогда: 30.09 так пропал текст по
+     всему макету.
+
+     Сторож: если скрипт не загрузился или не ожил за три секунды, класс dv
+     снимается и страница показывается целиком, без движения. Пустой страницы
+     человек не увидит ни при каких обстоятельствах. */
+  function podklyuchitDvizhenie() {
+    if (document.querySelector('script[data-dvizhenie]')) return;
+    var pokazatVsyo = function () { document.documentElement.classList.remove('dv'); };
+    var storozh = setTimeout(pokazatVsyo, 3000);
+    var s = document.createElement('script');
+    s.src = 'dvizhenie.js?v=2';
+    s.setAttribute('data-dvizhenie', '');
+    s.onload = function () { clearTimeout(storozh); };
+    s.onerror = function () { clearTimeout(storozh); pokazatVsyo(); };
+    document.body.appendChild(s);
   }
 
   /* ---------- шапка ---------- */
