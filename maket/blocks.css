@@ -1136,9 +1136,28 @@ a.rating:active { transform: scale(.98); }
 }
 
 /* сетка отзывов */
-.reviews__grid { display: grid; gap: 16px; margin-top: clamp(26px, 3.5vw, 40px); }
-@media (min-width: 700px)  { .reviews__grid { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 1180px) { .reviews__grid { grid-template-columns: repeat(3, 1fr); } }
+/* Отзывы идут одной строкой и листаются пальцем влево-вправо. Стрелок нет -
+   решение Eugene: на телефоне лист пальцем понятнее кнопок. Карточка
+   прилипает к краю, поэтому лист всегда останавливается на целом отзыве. */
+.reviews__grid {
+  display: flex;
+  gap: 16px;
+  margin-top: clamp(26px, 3.5vw, 40px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 0;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;                /* полосу прокрутки прячем: лист пальцем */
+  padding-bottom: 4px;
+}
+.reviews__grid::-webkit-scrollbar { display: none; }
+.reviews__grid > .review {
+  flex: 0 0 86%;
+  scroll-snap-align: start;
+}
+@media (min-width: 700px)  { .reviews__grid > .review { flex-basis: 46%; } }
+@media (min-width: 1180px) { .reviews__grid > .review { flex-basis: 31.5%; } }
 
 .review {
   display: grid;
@@ -1675,6 +1694,7 @@ html.is-modal { overflow: hidden; }
 
 /* Цена комплекта - последней строкой раскрытого пункта */
 .acc__price {
+  text-wrap: balance;
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid var(--line, rgba(255,255,255,.12));
@@ -1696,8 +1716,10 @@ html.is-modal { overflow: hidden; }
 @media (max-width: 719px) {
   .hero__actions .btn,
   .panel__ctas .btn,
+  .reviews__buttons .btn,
   .calc__go,
   .lead__submit { width: 100%; justify-content: center; }
+  .reviews__buttons { display: grid; }
   .hero__actions { align-items: stretch; }
   .panel__ctas { display: grid; }
 }

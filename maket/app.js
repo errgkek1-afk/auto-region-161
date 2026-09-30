@@ -282,7 +282,7 @@
           '</h1>' +
           '<p class="hero__term roll" id="hero-term" aria-live="polite">' +
             '<span class="roll__line">' + termHtml(h.states[0]) + '</span></p>' +
-          '<ul class="hero__hooks">' + hooks + '</ul>' +
+          '<ul class="hero__hooks" data-stagger>' + hooks + '</ul>' +
           '<div class="hero__actions">' +
             leadBtn('btn--cta', h.cta, 'первый экран', 18) +
             '<p class="hero__counter" data-count>' +
@@ -321,11 +321,27 @@
   }
 
   /* =====================  БЛОК 3 — Настройка ГБО  ===================== */
+
+  /* Фраза с числом внутри («Мы сделали 137 таких машин») превращается в
+     блок с барабаном: число крутится, остальное остаётся текстом.
+     Нет числа - возвращаем как было. */
+  function countHtml(text, cls) {
+    /* число целиком, вместе с пробелом внутри («3 067»), но без хвостового:
+       иначе пробел уезжает в число и текст склеивается - «137таких машин» */
+    var m = /(\d[\d  ]*\d|\d)/.exec(text);
+    if (!m) return '<span class="' + cls + '">' + esc(text) + '</span>';
+    return '<span class="' + cls + '" data-count>' +
+      esc(text.slice(0, m.index)) +
+      '<b data-count-num>' + esc(m[1].trim()) + '</b>' +
+      '<span data-count-text>' + esc(text.slice(m.index + m[1].length)) + '</span>' +
+    '</span>';
+  }
+
   function panelHtml(i) {
     var b = S.tuning.subblocks[i];
 
     var groups = (b.blocks || []).map(function (g) {
-      return '<div class="panel__group">' +
+      return '<div class="panel__group" data-stagger>' +
         (g.h ? '<span class="panel__h">' + esc(g.h) + '</span>' : '') +
         '<p class="panel__text">' + lede(g.text) + '</p>' +
       '</div>';
@@ -337,13 +353,13 @@
     if (b.cards && b.cards.length) {
       cards = '<div class="panel__cards-wrap">' +
         (b.cardsLead ? '<span class="panel__cards-lead">' + esc(b.cardsLead) + '</span>' : '') +
-        '<div class="panel__cards">' + b.cards.map(function (c) {
+        '<div class="panel__cards" data-stagger>' + b.cards.map(function (c) {
           return '<div class="panel__card">' +
             '<span class="panel__card-h">' + esc(c.h) + '</span>' +
             (c.sub ? '<span class="panel__card-sub">' + esc(c.sub) + '</span>' : '') +
             '<p class="panel__card-text">' + lede(c.text) + '</p>' +
             (c.note ? '<p class="panel__card-note">' + esc(c.note) + '</p>' : '') +
-            (c.count ? '<span class="panel__count">' + esc(c.count) + '</span>' : '') +
+            (c.count ? countHtml(c.count, 'panel__count') : '') +
           '</div>';
         }).join('') + '</div>' +
         (b.cardsOut ? '<p class="panel__cards-out">' + esc(b.cardsOut) + '</p>' : '') +
@@ -449,7 +465,7 @@
       '<h2 class="compare__title" data-reveal>' + accent(c.title) + '</h2>' +
       (c.sub ? '<p class="compare__sub">' + esc(c.sub) + '</p>' : '') +
       '<div class="compare__grid">' +
-        '<div class="compare__table">' +
+        '<div class="compare__table" data-stagger>' +
           '<div class="compare__head"><span>' + esc(c.headThem) + '</span><span>' + esc(c.headUs) + '</span></div>' +
           rows +
           '<p class="compare__closing">' + esc(c.closing) + '</p>' +
@@ -522,12 +538,12 @@
         '</div>' +
       '</div>' +
 
-      '<div class="acc">' + acc + '</div>' +
+      '<div class="acc" data-stagger>' + acc + '</div>' +
 
       '<div class="warranty">' +
         '<h3 class="warranty__title">' + esc(w.title) + '</h3>' +
         (w.first ? '<p class="warranty__first">' + ic('check', { size: 17 }) + esc(w.first) + '</p>' : '') +
-        '<div class="warranty__cards">' + cards + '</div>' +
+        '<div class="warranty__cards" data-stagger>' + cards + '</div>' +
         (w.note ? '<p class="warranty__note">' + esc(w.note) + '</p>' : '') +
       '</div>' +
     '</div></section>';
@@ -682,7 +698,7 @@
 
     return '<section class="team" id="team"><div class="wrap">' +
       '<h2 class="team__title" data-reveal>' + accent(t.title) + '</h2>' +
-      '<div class="team__grid">' + people + '</div>' +
+      '<div class="team__grid" data-stagger>' + people + '</div>' +
       '<div class="not">' +
         '<h3 class="not__title">' + esc(t.notTitle) + '</h3>' +
         '<ul class="not__list">' + not + '</ul>' +
@@ -738,7 +754,7 @@
 
     return '<section class="reviews" id="reviews"><div class="wrap">' +
       '<div class="reviews__head">' +
-        '<h2 class="reviews__lead" data-reveal>' + esc(r.lead) + '</h2>' +
+        '<h2 class="reviews__lead" data-reveal>' + accent(r.lead) + '</h2>' +
         ratings +
       '</div>' +
       '<div class="reviews__grid">' + items + '</div>' +
@@ -768,7 +784,7 @@
 
     return '<section class="faq" id="faq"><div class="wrap">' +
       '<h2 class="faq__lead" data-reveal>' + esc(f.lead) + '</h2>' +
-      '<div class="acc faq__acc">' + items + '</div>' +
+      '<div class="acc faq__acc" data-stagger>' + items + '</div>' +
     '</div></section>';
   }
 
@@ -806,7 +822,7 @@
           '</div>' +
           '<div class="loc__block">' +
             '<b>' + esc(l.routesLabel) + '</b>' +
-            '<div class="loc__routes">' + routes + '</div>' +
+            '<div class="loc__routes" data-stagger>' + routes + '</div>' +
           '</div>' +
           (y.org ? '<a class="btn btn--map" href="' + esc(y.org) + '" target="_blank" rel="noopener">' +
             'Открыть в Яндекс.Картах' + ic('arrow', { size: 16 }) + '</a>' : '') +
