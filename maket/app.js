@@ -278,7 +278,7 @@
 
         '<div class="hero__text">' +
           '<h1 class="hero__title" data-reveal>' + esc(h.title) +
-            '<span class="hero__engines">' + esc(h.engines) + '</span>' +
+            (h.engines ? '<span class="hero__engines">' + esc(h.engines) + '</span>' : '') +
           '</h1>' +
           '<p class="hero__term roll" id="hero-term" aria-live="polite">' +
             '<span class="roll__line">' + termHtml(h.states[0]) + '</span></p>' +

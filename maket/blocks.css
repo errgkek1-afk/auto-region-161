@@ -74,7 +74,7 @@
 }
 
 /* ---------- левая колонка ---------- */
-.hero__title { font-size: var(--fs-display); letter-spacing: -0.038em; text-wrap: balance; }
+.hero__title { font-size: var(--fs-display); letter-spacing: -0.038em; }
 /* Самые узкие телефоны (320 px): строки, которые обычно стоят в одну
    линию, здесь переносятся — иначе страница уезжала вбок. От 360 px всё как было. */
 @media (max-width: 350px) {
