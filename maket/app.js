@@ -982,8 +982,11 @@
     var fon = r.videoFon || r.video;
     return '<div class="reelfloat" data-reelfloat data-reelfloat-full="' + esc(r.video) + '">' +
         '<button class="reelfloat__box" type="button" data-reelfloat-toggle aria-label="Смотреть ролик">' +
-          '<video class="reelfloat__video" muted loop playsinline preload="metadata" ' +
-            'poster="' + esc(r.poster || '') + '"><source src="' + esc(fon) + '" type="video/mp4"></video>' +
+          /* Файл петли не подключаем сразу: 0,9 МБ забивали канал на первой
+             секунде и задерживали показ страницы. Адрес лежит в data-fon,
+             включается в wireReelFloat, когда ролик появляется. */
+          '<video class="reelfloat__video" muted loop playsinline preload="none" ' +
+            'data-fon="' + esc(fon) + '" poster="' + esc(r.poster || '') + '"></video>' +
           '<span class="reelfloat__badge">' + ic('play', { size: 14 }) + esc(r.label || 'Смотреть') + '</span>' +
         '</button>' +
         '<button class="reelfloat__close" type="button" data-reelfloat-hide aria-label="Убрать ролик">' +
@@ -1009,13 +1012,27 @@
       new IntersectionObserver(function (zapisi, nabl) {
         if (!zapisi[0].isIntersecting) return;
         box.classList.remove('is-later');
+        vklyuchitFon();
         nabl.disconnect();
       }).observe(sledom);
     }
 
     var polnyy = box.getAttribute('data-reelfloat-full') || '';
-    var polnyyVkadre = !polnyy || v.currentSrc.indexOf(polnyy) >= 0;
+    var polnyyVkadre = false;
     var zapas = null;
+
+    /* Подключить фоновую петлю. До этого в углу видна только обложка (картинка
+       в 65 КБ), и страница грузится без лишнего мегабайта. */
+    var fonVklyuchen = false;
+    function vklyuchitFon() {
+      if (fonVklyuchen) return;
+      fonVklyuchen = true;
+      var fon = v.getAttribute('data-fon');
+      if (!fon) return;
+      v.src = fon;
+      v.load();
+      playQuiet();
+    }
 
     /* Прогрев: скрытый элемент кладёт полный ролик в кеш браузера, пока человек
        только тянется к нему мышкой или пальцем. Подменять источник заранее
@@ -1035,6 +1052,7 @@
     function toBig() {
       big = true;
       box.classList.add('is-big');
+      fonVklyuchen = true;        /* петля больше не нужна: ставим полный файл */
       if (!polnyyVkadre) {        /* время смотреть целиком — берём полный файл */
         polnyyVkadre = true;
         v.src = polnyy;
@@ -1072,7 +1090,14 @@
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) v.pause(); else if (!big) playQuiet();
     });
-    playQuiet();
+
+    /* На компьютере ролик виден сразу, но петлю берём после того, как
+       страница догрузилась: сначала человек видит страницу, потом картинка
+       в углу оживает. На телефоне её включает наблюдатель выше. */
+    if (!telefon) {
+      if (document.readyState === 'complete') setTimeout(vklyuchitFon, 400);
+      else window.addEventListener('load', function () { setTimeout(vklyuchitFon, 400); });
+    }
   }
 
   /* =====================  СБОРКА  ===================== */

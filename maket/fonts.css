@@ -1,6 +1,13 @@
 /* Шрифт Inter лежит на самом сайте, а не на серверах Google:
    так данные посетителей не уходят за границу и страница грузится быстрее.
-   Только кириллица и латиница. Лицензия SIL Open Font License. */
+   Только кириллица и латиница. Лицензия SIL Open Font License.
+
+   Расширенная латиница (inter-latin-ext.woff2, 85 КБ) с сайта убрана: из всего
+   её набора на странице встречался один символ — знак рубля ₽, и ради него
+   каждый посетитель качал 85 КБ. Вместо неё лежит inter-rubl.woff2 (1,2 КБ) —
+   тот же шрифт, обрезанный до одного знака. Если на сайте появятся буквы с
+   диакритикой (ā, ę, ž) или другие валюты, их нарисует системный шрифт —
+   тогда файл надо нарезать заново, с нужными символами. */
 
 /* cyrillic-ext */
 @font-face {
@@ -28,8 +35,8 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(fonts/inter-latin-ext.woff2) format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  src: url(fonts/inter-rubl.woff2) format('woff2');
+  unicode-range: U+20BD;   /* только знак рубля — см. комментарий выше */
 }
 
 /* latin */
@@ -68,8 +75,8 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(fonts/inter-latin-ext.woff2) format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  src: url(fonts/inter-rubl.woff2) format('woff2');
+  unicode-range: U+20BD;   /* только знак рубля — см. комментарий выше */
 }
 
 /* latin */
@@ -108,8 +115,8 @@
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url(fonts/inter-latin-ext.woff2) format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  src: url(fonts/inter-rubl.woff2) format('woff2');
+  unicode-range: U+20BD;   /* только знак рубля — см. комментарий выше */
 }
 
 /* latin */
