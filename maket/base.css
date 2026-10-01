@@ -67,14 +67,14 @@ h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; }
 /* Главная кнопка: в покое сдержанная тёмно-красная,
    на ховере заливается ярким красным. */
 .btn--cta {
-  background: var(--accent-deep);
+  background: var(--accent-btn);
   color: #fff;
-  border: 1px solid #7a1d19;
+  border: 1px solid #ff6b63;
 }
 .btn--cta:hover,
 .btn--cta:focus-visible {
-  background: var(--accent-btn);
-  border-color: #ff7a72;
+  background: var(--accent-hot);
+  border-color: #ffb3ae;
   color: #fff;
   text-shadow: 0 0 16px rgba(255, 255, 255, .85), 0 0 34px rgba(255, 255, 255, .4);
   box-shadow: 0 0 26px -4px rgba(255, 42, 32, .75);
@@ -87,16 +87,16 @@ h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; }
 
 .btn--sm { height: 38px; padding-inline: 18px; font-size: var(--fs-sm); }
 
-/* Кнопка в шапке: в покое приглушённая, при наведении загорается. */
+/* Кнопка в шапке: тот же красный, что у остальных, при наведении ярче. */
 .btn--soft {
-  background: var(--accent-deep);
-  border: 1px solid #7a1d19;
+  background: var(--accent-btn);
+  border: 1px solid #ff6b63;
   color: #fff;
 }
 .btn--soft:hover,
 .btn--soft:focus-visible {
-  background: var(--accent-btn);
-  border-color: #ff7a72;
+  background: var(--accent-hot);
+  border-color: #ffb3ae;
   color: #fff;
   text-shadow: 0 0 14px rgba(255, 255, 255, .8);
   box-shadow: 0 0 22px -4px rgba(255, 42, 32, .8);

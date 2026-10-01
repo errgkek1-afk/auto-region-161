@@ -515,7 +515,11 @@
 .review__name { display: block; font-size: var(--fs-sm); font-weight: 600; }
 .review__meta { display: block; font-size: var(--fs-xs); color: var(--text-dim); }
 
-.panel__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+/* Кнопка во всю ширину колонки - и на телефоне, и на компьютере:
+   по центру блока она терялась рядом с текстом (Eugene 01.10). */
+.panel__ctas { display: grid; gap: 12px; margin-top: 4px;
+  /* panel__foot сжимает всё по содержимому - кнопке это отменяем */
+  justify-self: stretch; }
 .panel__ctas .btn {
   height: auto;
   min-height: 50px;
@@ -524,7 +528,7 @@
   white-space: nowrap;      /* длинные подписи — одной аккуратной строкой */
   text-align: center;
 }
-.panel__ctas .btn { max-width: 100%; }
+.panel__ctas .btn { width: 100%; max-width: 100%; justify-content: center; }
 /* На телефонах уже 400 px длинная подпись в одну строку не влезает
    и сдвигала всю страницу вбок — там разрешаем перенос. */
 @media (max-width: 400px) { .panel__ctas .btn { white-space: normal; } }
@@ -1206,10 +1210,11 @@ a.review:hover .review__foot { color: var(--text-muted); }
   border-radius: var(--radius);
   background: var(--bg-elevated);
 }
-@media (min-width: 900px) { .reviews__cta { grid-template-columns: 1fr auto; align-items: center; } }
+/* На компьютере кнопка раньше стояла справа узкой - Eugene 01.10 просил во всю ширину */
 .reviews__cta p { font-size: clamp(1.1rem, 1.7vw, 1.4rem); font-weight: 600; letter-spacing: -0.025em; }
-.reviews__buttons { display: flex; flex-wrap: wrap; gap: 12px; }
-.reviews__buttons .btn { height: auto; min-height: 52px; padding: 13px 22px; white-space: normal; text-align: center; }
+.reviews__buttons { display: grid; gap: 12px; }
+.reviews__buttons .btn { width: 100%; height: auto; min-height: 52px; padding: 13px 22px;
+  white-space: normal; text-align: center; justify-content: center; }
 
 /* =====================================================================
    БЛОК 8 — Частые вопросы. Открытые карточки вопрос-ответ.
@@ -1686,6 +1691,18 @@ html.is-modal { overflow: hidden; }
 @media (max-width: 600px) {
   .reelfloat { width: 74px; left: 10px; bottom: 16px; }
   .reelfloat.is-big { width: min(60vw, calc(58vh * 9 / 16)); bottom: 16px; }
+  /* На телефоне ролик всего 74 точки шириной, и подпись «Смотреть», прижатая
+     к левому краю, вылезала за его рамку. Ставим её по центру и ужимаем
+     отступы, чтобы помещалась целиком (Eugene 01.10). На компьютере подпись
+     остаётся слева - там она влезает. */
+  .reelfloat__badge {
+    left: 50%; right: auto; bottom: 5px;
+    transform: translateX(-50%);
+    max-width: calc(100% - 8px);
+    padding: 3px 6px; gap: 3px;
+    justify-content: center;
+    white-space: nowrap;
+  }
 }
 @media (prefers-reduced-motion: reduce) { .reelfloat { transition: none; } }
 
@@ -1740,11 +1757,7 @@ html.is-modal { overflow: hidden; }
    Решение Eugene 30.09. */
 @media (max-width: 719px) {
   .hero__actions .btn,
-  .panel__ctas .btn,
-  .reviews__buttons .btn,
   .calc__go,
   .lead__submit { width: 100%; justify-content: center; }
-  .reviews__buttons { display: grid; }
   .hero__actions { align-items: stretch; }
-  .panel__ctas { display: grid; }
 }
