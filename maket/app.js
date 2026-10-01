@@ -506,7 +506,11 @@
             return '<li>' + ic('check', { size: 15 }) + '<span><b>' + esc(it.b) + '</b>' +
               (it.t ? ' — ' + esc(it.t) : '') + '</span></li>';
           }).join('') + '</ul>'
-        : '<p class="acc__text">' + esc(a.text) + '</p>';
+        /* \n в тексте = новый абзац: длинный кусок в одну простыню
+           не читается (Eugene 01.10) */
+        : a.text.split('\n').map(function (t) {
+            return '<p class="acc__text">' + esc(t) + '</p>';
+          }).join('');
       if (a.price) body += '<p class="acc__price">' + esc(a.price) + '</p>';
       return '<div class="acc__item" data-acc="' + i + '">' +
         '<button class="acc__head" aria-expanded="false">' + esc(a.title) + ic('chevronDown', { size: 18 }) + '</button>' +
