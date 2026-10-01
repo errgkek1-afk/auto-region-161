@@ -763,6 +763,7 @@
     return '<section class="reviews" id="reviews"><div class="wrap">' +
       '<div class="reviews__head">' +
         '<h2 class="reviews__lead" data-reveal>' + accent(r.lead) + '</h2>' +
+        (r.sub ? '<p class="reviews__sub">' + accent(r.sub) + '</p>' : '') +
         ratings +
       '</div>' +
       '<div class="reviews__grid" data-lenta>' + items + '</div>' +
