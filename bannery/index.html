@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Баннеры СТО АвтоРегион</title>
+<!-- Копия страницы для заказчика на github.io: открывается без VPN.
+     Шрифт сайта лежит рядом, внешних запросов нет. Источник - ../zakazchiku.html. -->
+<style>
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap; src: url(fonts/inter-cyrillic.woff2) format('woff2'); unicode-range: U+0400-045F, U+2116; }
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap; src: url(fonts/inter-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
+</style>
+<style>
+/* Раскладка: одна колонка; ползунок расстояния прилипает сверху, под ним вид у сервиса в одном масштабе, ниже три баннера. */
+:root {
+  --bg: #f3f1ef;
+  --panel: #ffffff;
+  --ink: #1b1617;
+  --muted: #6e6466;
+  --line: #ddd6d4;
+  --red: #c8201b;
+  --wall: #3b3f45;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Inter', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #120d0e; --panel: #1b1416; --ink: #f2eeed; --muted: #a39799; --line: #33282a;
+  --red: #ff4a3f; --wall: #2c2f34; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #120d0e; --panel: #1b1416; --ink: #f2eeed; --muted: #a39799; --line: #33282a;
+  --red: #ff4a3f; --wall: #2c2f34; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+.wrap { max-width: 1000px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); font-weight: 800; line-height: 1.1; text-wrap: balance; margin: 0; }
+h2 { font-size: 1.35rem; font-weight: 800; margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 70ch; }
+.eyebrow { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.lead { color: var(--muted); margin-top: 10px; }
+.note { font-size: .88rem; color: var(--muted); }
+section { display: grid; gap: 14px; min-width: 0; }
+
+.dial { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 12px 14px; display: grid; gap: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+.ctrl { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.ctrl label { font-weight: 600; }
+input[type=range] { width: 100%; accent-color: var(--red); }
+.dist { font-family: var(--mono); font-size: 1.15rem; min-width: 5.5ch; text-align: right; font-variant-numeric: tabular-nums; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.presets button { font: inherit; font-size: .88rem; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink); cursor: pointer; }
+.presets button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.presets button:focus-visible, input:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.scene { overflow-x: auto; border-radius: 8px; border: 1px solid var(--line); }
+.scene canvas { display: block; width: 100%; min-width: 760px; height: auto; }
+
+.banners { display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
+.pair { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); align-items: start; }
+figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+figcaption { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+figcaption b { font-weight: 600; }
+.size { font-family: var(--mono); font-size: .88rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.wall { background: var(--wall); border-radius: 6px; padding: 6%; display: grid; place-items: center; }
+.wall canvas { display: block; width: 100%; height: auto; }
+.wall.tall canvas { width: 62%; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">СТО АвтоРегион 161 · ул. 1-я Луговая, 15А</div>
+    <h1>Баннеры для сервиса</h1>
+    <p class="lead">Три баннера: большой на стену, длинный на забор и указатель к въезду. Ползунок ниже показывает, как их видно с разного расстояния: картинка размывается так, как её различает глаз с улицы.</p>
+  </header>
+
+  <div class="dial" role="group" aria-label="Расстояние до баннеров">
+    <div class="ctrl">
+      <label for="d">Смотрим с</label>
+      <input id="d" type="range" min="3" max="150" step="1" value="15">
+      <span class="dist" id="dv">15 м</span>
+    </div>
+    <div class="presets">
+      <button type="button" data-d="5">5 м</button>
+      <button type="button" data-d="15">15 м</button>
+      <button type="button" data-d="30">30 м</button>
+      <button type="button" data-d="60">60 м</button>
+      <button type="button" data-d="100">100 м</button>
+    </div>
+  </div>
+
+  <section aria-labelledby="sc">
+    <h2 id="sc">Как это будет выглядеть у сервиса</h2>
+    <div class="scene"><canvas id="scene" aria-label="Стена сервиса с большим баннером, ворота, забор с длинным баннером и указателем; человек и машина для масштаба"></canvas></div>
+    <p class="note">Примерный вид, всё в одном масштабе: человек ростом 1,75 м, легковая машина 4,5 м. Места на стене и заборе условные, их выберем на месте.</p>
+  </section>
+
+  <section aria-labelledby="bn">
+    <h2 id="bn">Баннеры</h2>
+    <div class="banners">
+      <figure>
+        <div class="wall"><canvas data-src="banner-1-616x314_prevyu.jpg" data-mm="6160" data-page="626x324" aria-label="Баннер на стену"></canvas></div>
+        <figcaption><b>На стену</b><span class="size">616 × 314 см</span></figcaption>
+      </figure>
+      <div class="pair">
+        <figure>
+          <div class="wall"><canvas data-src="banner-3b-600x160_prevyu.jpg" data-mm="6000" data-page="610x170" aria-label="Баннер на забор"></canvas></div>
+          <figcaption><b>На забор</b><span class="size">600 × 160 см</span></figcaption>
+        </figure>
+        <figure>
+          <div class="wall tall"><canvas data-src="banner-2b-120x140_prevyu.jpg" data-mm="1200" data-page="130x150" aria-label="Указатель"></canvas></div>
+          <figcaption><b>Указатель</b><span class="size">120 × 140 см</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const ARCMIN_MM_PER_M = 0.2909;   // 1 угловая минута - разрешение нормального глаза - на 1 м расстояния
+  const BLEED_CM = 5;               // запас под проклейку в файлах, на готовом баннере его нет
+  const range = document.getElementById('d');
+  const out = document.getElementById('dv');
+  const buttons = [...document.querySelectorAll('.presets button')];
+
+  const load = src => new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.src = src; });
+
+  // Кадр без запаса: обрезаем 5 см с каждой стороны
+  function crop(img, page) {
+    const [pw, ph] = page.split('x').map(Number);
+    const sx = img.naturalWidth * BLEED_CM / pw, sy = img.naturalHeight * BLEED_CM / ph;
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth - 2 * sx); c.height = Math.round(img.naturalHeight - 2 * sy);
+    c.getContext('2d').drawImage(img, sx, sy, c.width, c.height, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  // Размыть картинку под глаз на расстоянии d и нарисовать в target
+  function blurTo(target, src, widthMm, d) {
+    const w = Math.max(6, Math.min(src.width, Math.round(widthMm / (d * ARCMIN_MM_PER_M))));
+    const h = Math.max(4, Math.round(w * src.height / src.width));
+    const small = document.createElement('canvas');
+    small.width = w; small.height = h;
+    const s = small.getContext('2d');
+    s.imageSmoothingEnabled = true; s.imageSmoothingQuality = 'high';
+    s.drawImage(src, 0, 0, w, h);
+    const t = target.getContext('2d');
+    t.imageSmoothingEnabled = true; t.imageSmoothingQuality = 'high';
+    t.clearRect(0, 0, target.width, target.height);
+    t.drawImage(small, 0, 0, target.width, target.height);
+  }
+
+  // ---- Вид у сервиса, всё в метрах ----
+  const SCENE_W = 30, SCENE_H = 7.4, GROUND = 0.8, PX = 100;   // ширина и высота сцены, асфальт под землёй, точек на метр
+  function scene(b1, b3, b2) {
+    const c = document.createElement('canvas');
+    c.width = SCENE_W * PX; c.height = SCENE_H * PX;
+    const g = c.getContext('2d');
+    const X = m => m * PX, Y = m => (SCENE_H - GROUND - m) * PX;   // y от земли вверх
+    const rect = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(X(x), Y(y + h), w * PX, h * PX); };
+
+    const sky = g.createLinearGradient(0, 0, 0, Y(0));
+    sky.addColorStop(0, '#cfdce6'); sky.addColorStop(1, '#eef1f3');
+    g.fillStyle = sky; g.fillRect(0, 0, c.width, Y(0));
+    rect(0, -GROUND, SCENE_W, GROUND, '#4a4d52');                  // асфальт
+    rect(0, -0.08, SCENE_W, 0.08, '#8d9096');                      // бордюр
+
+    // здание сервиса
+    rect(0.5, 0, 14.5, 5.6, '#d6d1c9');
+    rect(0.5, 0, 14.5, 0.4, '#a59f97');
+    rect(0.3, 5.6, 14.9, 0.25, '#5b5f66');
+    // ворота
+    rect(8.8, 0, 4.4, 4.0, '#6c7178');
+    rect(9.0, 0, 4.0, 3.8, '#aeb4ba');
+    g.fillStyle = '#959ba2';
+    for (let y = 0.12; y < 3.8; y += 0.14) g.fillRect(X(9.0), Y(y), 4.0 * PX, 2);
+
+    // забор из профлиста
+    rect(15, 0, 15, 2.2, '#7d8a80');
+    g.fillStyle = '#6b776e';
+    for (let x = 15.1; x < 30; x += 0.2) g.fillRect(X(x), Y(2.2), 3, 2.2 * PX);
+    rect(15, 2.15, 15, 0.07, '#5c665e');
+
+    // баннеры в настоящих размерах
+    const put = (img, x, y, w, h) => g.drawImage(img, X(x), Y(y + h), w * PX, h * PX);
+    put(b1, 1.3, 1.3, 6.16, 3.14);
+    put(b3, 15.8, 0.3, 6.0, 1.6);
+    put(b2, 23.4, 0.4, 1.2, 1.4);
+
+    // машина у ворот
+    g.fillStyle = '#4f5d6c';
+    g.beginPath(); g.roundRect(X(9.3), Y(0.95), 4.5 * PX, 0.65 * PX, 18); g.fill();
+    g.beginPath();
+    g.moveTo(X(10.3), Y(0.95)); g.lineTo(X(10.9), Y(1.45)); g.lineTo(X(12.6), Y(1.45)); g.lineTo(X(13.2), Y(0.95)); g.closePath(); g.fill();
+    g.fillStyle = '#b9c6d2';
+    g.beginPath(); g.moveTo(X(10.55), Y(1.0)); g.lineTo(X(11.0), Y(1.38)); g.lineTo(X(11.7), Y(1.38)); g.lineTo(X(11.7), Y(1.0)); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(X(11.85), Y(1.0)); g.lineTo(X(11.85), Y(1.38)); g.lineTo(X(12.5), Y(1.38)); g.lineTo(X(12.95), Y(1.0)); g.closePath(); g.fill();
+    g.fillStyle = '#1e2126';
+    [10.3, 12.9].forEach(x => { g.beginPath(); g.arc(X(x), Y(0.32), 0.32 * PX, 0, Math.PI * 2); g.fill(); });
+
+    // человек у указателя
+    g.fillStyle = '#2a2d33';
+    const px = 25.6;
+    g.beginPath(); g.arc(X(px), Y(1.63), 0.11 * PX, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.roundRect(X(px - 0.22), Y(1.5), 0.44 * PX, 0.68 * PX, 10); g.fill();
+    g.fillRect(X(px - 0.17), Y(0.86), 0.15 * PX, 0.86 * PX);
+    g.fillRect(X(px + 0.02), Y(0.86), 0.15 * PX, 0.86 * PX);
+    return c;
+  }
+
+  // Подписи и линейка поверх размытия: они нужны чёткими на любом расстоянии
+  function sceneOverlay(c) {
+    const g = c.getContext('2d');
+    const k = c.width / SCENE_W;
+    const X = m => m * k, Y = m => (SCENE_H - GROUND - m) * k;
+    g.font = `600 ${0.28 * k}px Inter, system-ui, sans-serif`;
+    g.textBaseline = 'bottom';
+    const label = (txt, x, y) => {
+      const w = g.measureText(txt).width + 0.24 * k;
+      g.fillStyle = 'rgba(255,255,255,.92)'; g.fillRect(X(x), Y(y) - 0.4 * k, w, 0.38 * k);
+      g.fillStyle = '#1b1617'; g.fillText(txt, X(x) + 0.12 * k, Y(y) - 0.06 * k);
+    };
+    label('616 × 314 см', 1.3, 4.5);
+    label('600 × 160 см', 15.8, 2.75);
+    label('120 × 140 см', 23.0, 2.75);
+    // линейка по асфальту
+    g.strokeStyle = 'rgba(255,255,255,.75)'; g.fillStyle = 'rgba(255,255,255,.85)';
+    g.lineWidth = Math.max(1, 0.02 * k);
+    const base = Y(-0.6);
+    g.beginPath(); g.moveTo(X(0.5), base); g.lineTo(X(29.5), base); g.stroke();
+    g.font = `500 ${0.22 * k}px Inter, system-ui, sans-serif`;
+    g.textBaseline = 'alphabetic';
+    for (let m = 0; m <= 29; m++) {
+      const x = X(0.5 + m), t = m % 5 === 0 ? 0.18 : 0.09;
+      g.beginPath(); g.moveTo(x, base); g.lineTo(x, base - t * k); g.stroke();
+      if (m % 5 === 0) g.fillText(m + ' м', x + 0.06 * k, base - 0.08 * k);
+    }
+  }
+
+  const items = [];
+  Promise.all([...document.querySelectorAll('canvas[data-src]')].map(async c => {
+    const src = crop(await load(c.dataset.src), c.dataset.page);
+    c.width = 1400; c.height = Math.round(1400 * src.height / src.width);
+    const it = { c, src, mm: +c.dataset.mm };
+    items.push(it);
+    return it;
+  })).then(list => {
+    const sc = document.getElementById('scene');
+    sc.width = 2400; sc.height = Math.round(2400 * SCENE_H / SCENE_W);
+    items.push({ c: sc, src: scene(list[0].src, list[1].src, list[2].src), mm: SCENE_W * 1000, overlay: sceneOverlay });
+    update();
+  });
+
+  function update() {
+    const d = +range.value;
+    out.textContent = d + ' м';
+    buttons.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.d === d)));
+    items.forEach(it => { blurTo(it.c, it.src, it.mm, d); it.overlay && it.overlay(it.c); });
+  }
+
+  range.addEventListener('input', update);
+  buttons.forEach(b => b.addEventListener('click', () => { range.value = b.dataset.d; update(); }));
+  out.textContent = range.value + ' м';
+})();
+</script>
+</body>
+</html>
