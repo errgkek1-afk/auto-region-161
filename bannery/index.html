@@ -80,7 +80,7 @@ figcaption b { font-weight: 600; }
   <header>
     <div class="eyebrow">СТО АвтоРегион 161 · ул. 1-я Луговая, 4А</div>
     <h1>Баннеры для сервиса</h1>
-    <p class="lead">Три баннера: большой на стену, длинный на забор и указатель к въезду. Ползунок ниже показывает, как их видно с разного расстояния: картинка размывается так, как её различает глаз с улицы.</p>
+    <p class="lead">Четыре баннера: большой на стену, длинный на забор и два указателя по обе стороны от сервиса. Ползунок ниже показывает, как их видно с разного расстояния: картинка размывается так, как её различает глаз с улицы.</p>
   </header>
 
   <div class="dial" role="group" aria-label="Расстояние до баннеров">
@@ -111,14 +111,18 @@ figcaption b { font-weight: 600; }
         <div class="wall"><canvas data-src="banner-1-616x314_prevyu.jpg" data-mm="6160" data-page="626x324" aria-label="Баннер на стену"></canvas></div>
         <figcaption><b>На стену</b><span class="size">616 × 314 см</span></figcaption>
       </figure>
+      <figure>
+        <div class="wall"><canvas data-src="banner-3b-600x160_prevyu.jpg" data-mm="6000" data-page="610x170" aria-label="Баннер на забор"></canvas></div>
+        <figcaption><b>На забор</b><span class="size">600 × 160 см</span></figcaption>
+      </figure>
       <div class="pair">
         <figure>
-          <div class="wall"><canvas data-src="banner-3b-600x160_prevyu.jpg" data-mm="6000" data-page="610x170" aria-label="Баннер на забор"></canvas></div>
-          <figcaption><b>На забор</b><span class="size">600 × 160 см</span></figcaption>
+          <div class="wall tall"><canvas data-src="banner-2b-vpravo-120x140_prevyu.jpg" data-mm="1200" data-page="130x150" aria-label="Указатель со стрелкой вправо"></canvas></div>
+          <figcaption><b>Указатель слева от сервиса</b><span class="size">120 × 140 см</span></figcaption>
         </figure>
         <figure>
-          <div class="wall tall"><canvas data-src="banner-2b-120x140_prevyu.jpg" data-mm="1200" data-page="130x150" aria-label="Указатель"></canvas></div>
-          <figcaption><b>Указатель</b><span class="size">120 × 140 см</span></figcaption>
+          <div class="wall tall"><canvas data-src="banner-2b-120x140_prevyu.jpg" data-mm="1200" data-page="130x150" aria-label="Указатель со стрелкой влево"></canvas></div>
+          <figcaption><b>Указатель справа от сервиса</b><span class="size">120 × 140 см</span></figcaption>
         </figure>
       </div>
     </div>
@@ -161,19 +165,20 @@ figcaption b { font-weight: 600; }
   }
 
   // ---- Вид у сервиса, всё в метрах ----
-  const SCENE_W = 30, SCENE_H = 7.4, GROUND = 0.8, PX = 100;   // ширина и высота сцены, асфальт под землёй, точек на метр
-  function scene(b1, b3, b2) {
+  const SCENE_W = 37, SCENE_H = 7.4, GROUND = 0.8, PX = 100;   // ширина и высота сцены, асфальт под землёй, точек на метр
+  const OX = 7;                                                 // сколько метров сцены левее здания: там второй указатель
+  function scene(b1, b3, b2, b2r) {
     const c = document.createElement('canvas');
     c.width = SCENE_W * PX; c.height = SCENE_H * PX;
     const g = c.getContext('2d');
-    const X = m => m * PX, Y = m => (SCENE_H - GROUND - m) * PX;   // y от земли вверх
+    const X = m => (m + OX) * PX, Y = m => (SCENE_H - GROUND - m) * PX;   // x от угла здания, y от земли вверх
     const rect = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(X(x), Y(y + h), w * PX, h * PX); };
 
     const sky = g.createLinearGradient(0, 0, 0, Y(0));
     sky.addColorStop(0, '#cfdce6'); sky.addColorStop(1, '#eef1f3');
     g.fillStyle = sky; g.fillRect(0, 0, c.width, Y(0));
-    rect(0, -GROUND, SCENE_W, GROUND, '#4a4d52');                  // асфальт
-    rect(0, -0.08, SCENE_W, 0.08, '#8d9096');                      // бордюр
+    rect(-OX, -GROUND, SCENE_W, GROUND, '#4a4d52');                // асфальт
+    rect(-OX, -0.08, SCENE_W, 0.08, '#8d9096');                    // бордюр
 
     // здание сервиса
     rect(0.5, 0, 14.5, 5.6, '#d6d1c9');
@@ -186,16 +191,19 @@ figcaption b { font-weight: 600; }
     for (let y = 0.12; y < 3.8; y += 0.14) g.fillRect(X(9.0), Y(y), 4.0 * PX, 2);
 
     // забор из профлиста
-    rect(15, 0, 15, 2.2, '#7d8a80');
-    g.fillStyle = '#6b776e';
-    for (let x = 15.1; x < 30; x += 0.2) g.fillRect(X(x), Y(2.2), 3, 2.2 * PX);
-    rect(15, 2.15, 15, 0.07, '#5c665e');
+    [[-OX, 0.5], [15, 30]].forEach(([a, b]) => {
+      rect(a, 0, b - a, 2.2, '#7d8a80');
+      g.fillStyle = '#6b776e';
+      for (let x = a + 0.1; x < b; x += 0.2) g.fillRect(X(x), Y(2.2), 3, 2.2 * PX);
+      rect(a, 2.15, b - a, 0.07, '#5c665e');
+    });
 
     // баннеры в настоящих размерах
     const put = (img, x, y, w, h) => g.drawImage(img, X(x), Y(y + h), w * PX, h * PX);
     put(b1, 1.3, 1.3, 6.16, 3.14);
     put(b3, 15.8, 0.3, 6.0, 1.6);
     put(b2, 23.4, 0.4, 1.2, 1.4);
+    put(b2r, -2.6, 0.4, 1.2, 1.4);
 
     // машина у ворот
     g.fillStyle = '#4f5d6c';
@@ -222,7 +230,7 @@ figcaption b { font-weight: 600; }
   function sceneOverlay(c) {
     const g = c.getContext('2d');
     const k = c.width / SCENE_W;
-    const X = m => m * k, Y = m => (SCENE_H - GROUND - m) * k;
+    const X = m => (m + OX) * k, Y = m => (SCENE_H - GROUND - m) * k;
     g.font = `600 ${0.28 * k}px Inter, system-ui, sans-serif`;
     g.textBaseline = 'bottom';
     const label = (txt, x, y) => {
@@ -233,15 +241,16 @@ figcaption b { font-weight: 600; }
     label('616 × 314 см', 1.3, 4.5);
     label('600 × 160 см', 15.8, 2.75);
     label('120 × 140 см', 23.0, 2.75);
+    label('120 × 140 см', -3.0, 2.75);
     // линейка по асфальту
     g.strokeStyle = 'rgba(255,255,255,.75)'; g.fillStyle = 'rgba(255,255,255,.85)';
     g.lineWidth = Math.max(1, 0.02 * k);
     const base = Y(-0.6);
-    g.beginPath(); g.moveTo(X(0.5), base); g.lineTo(X(29.5), base); g.stroke();
+    g.beginPath(); g.moveTo(X(0.5 - OX), base); g.lineTo(X(SCENE_W - OX - 0.5), base); g.stroke();
     g.font = `500 ${0.22 * k}px Inter, system-ui, sans-serif`;
     g.textBaseline = 'alphabetic';
-    for (let m = 0; m <= 29; m++) {
-      const x = X(0.5 + m), t = m % 5 === 0 ? 0.18 : 0.09;
+    for (let m = 0; m <= SCENE_W - 1; m++) {
+      const x = X(0.5 - OX + m), t = m % 5 === 0 ? 0.18 : 0.09;
       g.beginPath(); g.moveTo(x, base); g.lineTo(x, base - t * k); g.stroke();
       if (m % 5 === 0) g.fillText(m + ' м', x + 0.06 * k, base - 0.08 * k);
     }
@@ -257,7 +266,7 @@ figcaption b { font-weight: 600; }
   })).then(list => {
     const sc = document.getElementById('scene');
     sc.width = 2400; sc.height = Math.round(2400 * SCENE_H / SCENE_W);
-    items.push({ c: sc, src: scene(list[0].src, list[1].src, list[2].src), mm: SCENE_W * 1000, overlay: sceneOverlay });
+    items.push({ c: sc, src: scene(list[0].src, list[1].src, list[3].src, list[2].src), mm: SCENE_W * 1000, overlay: sceneOverlay });
     update();
   });
 
